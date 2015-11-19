@@ -24,7 +24,7 @@
   <name>zendesk-java-client</name>
   <description>Java client for the Zendesk API</description>
   <url>https://github.com/Smartling/zendesk-java-client</url>
-  <inceptionYear>2015</inceptionYear>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -32,23 +32,6 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-
-  <prerequisites>
-    <maven>3.0.4</maven>
-  </prerequisites>
-
-  <scm>
-    <connection>scm:git:git://github.com/Smartling/zendesk-java-client.git</connection>
-    <developerConnection>scm:git:git@github.com:Smartling/zendesk-java-client.git</developerConnection>
-    <url>http://github.com/Smartling/zendesk-java-client/tree/master/</url>
-    <tag>HEAD</tag>
-  </scm>
-  <issueManagement>
-
-  </issueManagement>
-  <ciManagement>
-
-  </ciManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
