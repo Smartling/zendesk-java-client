@@ -33,12 +33,6 @@
     </license>
   </licenses>
 
-  <developers>
-    <developer>
-      <name>Stephen Connolly</name>
-    </developer>
-  </developers>
-
   <prerequisites>
     <maven>3.0.4</maven>
   </prerequisites>
