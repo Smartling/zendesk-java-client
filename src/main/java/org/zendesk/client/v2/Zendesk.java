@@ -82,42 +82,42 @@ public class Zendesk implements Closeable {
     private final String url;
     private final String oauthToken;
     private final ObjectMapper mapper;
-    private final Logger logger; 
+    private final Logger logger;
     private boolean closed = false;
     private static final Map<String, Class<? extends SearchResultEntity>> searchResultTypes = searchResultTypes();
     private static final Map<String, Class<? extends Target>> targetTypes = targetTypes();
 
     private static Map<String, Class<? extends SearchResultEntity>> searchResultTypes() {
-       Map<String, Class<? extends SearchResultEntity>> result = new HashMap<String, Class<? extends
-             SearchResultEntity>>();
-       result.put("ticket", Ticket.class);
-       result.put("user", User.class);
-       result.put("group", Group.class);
-       result.put("organization", Organization.class);
-       result.put("topic", Topic.class);
+        Map<String, Class<? extends SearchResultEntity>> result = new HashMap<String, Class<? extends
+                SearchResultEntity>>();
+        result.put("ticket", Ticket.class);
+        result.put("user", User.class);
+        result.put("group", Group.class);
+        result.put("organization", Organization.class);
+        result.put("topic", Topic.class);
         result.put("article", Article.class);
-       return Collections.unmodifiableMap(result);
-    }
-    
-    private static Map<String, Class<? extends Target>> targetTypes() {
-       Map<String, Class<? extends Target>> result = new HashMap<String, Class<? extends Target>>();
-       result.put("url_target", UrlTarget.class);
-       result.put("email_target",EmailTarget.class);
-       result.put("basecamp_target", BasecampTarget.class);
-       result.put("campfire_target", CampfireTarget.class);    
-       result.put("pivotal_target", PivotalTarget.class);    
-       result.put("twitter_target", TwitterTarget.class);      
-      
-       // TODO: Implement other Target types
-       //result.put("clickatell_target", ClickatellTarget.class);
-       //result.put("flowdock_target", FlowdockTarget.class);
-       //result.put("get_satisfaction_target", GetSatisfactionTarget.class);
-       //result.put("yammer_target", YammerTarget.class);
-      
-       return Collections.unmodifiableMap(result);
+        return Collections.unmodifiableMap(result);
     }
 
-    private Zendesk(AsyncHttpClient client, String url, String username, String password) {    
+    private static Map<String, Class<? extends Target>> targetTypes() {
+        Map<String, Class<? extends Target>> result = new HashMap<String, Class<? extends Target>>();
+        result.put("url_target", UrlTarget.class);
+        result.put("email_target", EmailTarget.class);
+        result.put("basecamp_target", BasecampTarget.class);
+        result.put("campfire_target", CampfireTarget.class);
+        result.put("pivotal_target", PivotalTarget.class);
+        result.put("twitter_target", TwitterTarget.class);
+
+        // TODO: Implement other Target types
+        //result.put("clickatell_target", ClickatellTarget.class);
+        //result.put("flowdock_target", FlowdockTarget.class);
+        //result.put("get_satisfaction_target", GetSatisfactionTarget.class);
+        //result.put("yammer_target", YammerTarget.class);
+
+        return Collections.unmodifiableMap(result);
+    }
+
+    private Zendesk(AsyncHttpClient client, String url, String username, String password) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
         this.closeClient = client == null;
         this.oauthToken = null;
@@ -135,7 +135,7 @@ public class Zendesk implements Closeable {
                 throw new IllegalStateException("Cannot specify token or password without specifying username");
             }
             this.realm = null;
-        } 
+        }
         this.mapper = createMapper();
     }
 
@@ -192,7 +192,7 @@ public class Zendesk implements Closeable {
         for (JobStatus status : statuses) {
             ids.add(status.getId());
         }
-        Class<JobStatus<HashMap<String, Object>>> clazz = (Class<JobStatus<HashMap<String, Object>>>)(Object)JobStatus.class;
+        Class<JobStatus<HashMap<String, Object>>> clazz = (Class<JobStatus<HashMap<String, Object>>>) (Object) JobStatus.class;
         return submit(req("GET", tmpl("/job_statuses/show_many.json{?ids}").set("ids", ids)), handleList(clazz, "job_statuses"));
     }
 
@@ -205,7 +205,7 @@ public class Zendesk implements Closeable {
         return complete(submit(req("GET", cnst("/ticket_forms.json")), handleList(TicketForm.class,
                 "ticket_forms")));
     }
-    
+
     public Ticket getTicket(long id) {
         return complete(submit(req("GET", tmpl("/tickets/{id}.json").set("id", id)), handle(Ticket.class,
                 "ticket")));
@@ -322,19 +322,19 @@ public class Zendesk implements Closeable {
     public Iterable<Ticket> getRecentTickets() {
         return new PagedIterable<Ticket>(cnst("/tickets/recent.json"), handleList(Ticket.class, "tickets"));
     }
-    
+
     public Iterable<Ticket> getTicketsIncrementally(Date startTime) {
         return new PagedIterable<Ticket>(
-                tmpl("/incremental/tickets.json{?start_time}").set("start_time", msToSeconds(startTime.getTime())), 
-                handleIncrementalList(Ticket.class, "tickets"));                
+                tmpl("/incremental/tickets.json{?start_time}").set("start_time", msToSeconds(startTime.getTime())),
+                handleIncrementalList(Ticket.class, "tickets"));
     }
-    
+
     public Iterable<Ticket> getTicketsIncrementally(Date startTime, Date endTime) {
         return new PagedIterable<Ticket>(
                 tmpl("/incremental/tickets.json{?start_time,end_time}")
-                    .set("start_time", msToSeconds(startTime.getTime()))
-                    .set("end_time", msToSeconds(endTime.getTime())), 
-                    handleIncrementalList(Ticket.class, "tickets"));                
+                        .set("start_time", msToSeconds(startTime.getTime()))
+                        .set("end_time", msToSeconds(endTime.getTime())),
+                handleIncrementalList(Ticket.class, "tickets"));
     }
 
     public Iterable<Ticket> getOrganizationTickets(long organizationId) {
@@ -503,82 +503,82 @@ public class Zendesk implements Closeable {
     }
 
     public Target getTarget(long id) {
-       return complete(submit(req("GET", tmpl("/targets/{id}.json").set("id", id)), handle(Target.class, "target")));
+        return complete(submit(req("GET", tmpl("/targets/{id}.json").set("id", id)), handle(Target.class, "target")));
     }
-    
+
     public Target createTarget(Target target) {
         return complete(submit(req("POST", cnst("/targets.json"), JSON, json(Collections.singletonMap("target", target))),
-              handle(Target.class, "target")));
+                handle(Target.class, "target")));
     }
- 
-    public void deleteTarget(long targetId) { 
-       complete(submit(req("DELETE", tmpl("/targets/{id}.json").set("id", targetId)), handleStatus()));
+
+    public void deleteTarget(long targetId) {
+        complete(submit(req("DELETE", tmpl("/targets/{id}.json").set("id", targetId)), handleStatus()));
     }
-    
+
     public Iterable<Trigger> getTriggers() {
         return new PagedIterable<Trigger>(cnst("/triggers.json"), handleList(Trigger.class, "triggers"));
     }
 
     public Trigger getTrigger(long id) {
-       return complete(submit(req("GET", tmpl("/triggers/{id}.json").set("id", id)), handle(Trigger.class, "trigger")));
+        return complete(submit(req("GET", tmpl("/triggers/{id}.json").set("id", id)), handle(Trigger.class, "trigger")));
     }
-    
+
     public Trigger createTrigger(Trigger trigger) {
         return complete(submit(req("POST", cnst("/triggers.json"), JSON, json(Collections.singletonMap("trigger", trigger))),
-              handle(Trigger.class, "trigger")));
+                handle(Trigger.class, "trigger")));
     }
-    
+
     public Trigger updateTrigger(Long triggerId, Trigger trigger) {
-      return complete(submit(req("PUT", tmpl("/triggers/{id}.json").set("id", triggerId), JSON, json(Collections.singletonMap("trigger", trigger))),
-            handle(Trigger.class, "trigger")));
-  }
-
-    public void deleteTrigger(long triggerId) { 
-       complete(submit(req("DELETE", tmpl("/triggers/{id}.json").set("id", triggerId)), handleStatus()));
-    }
-    
-
-  // Automations
-  public Iterable<Automation> getAutomations() {
-    return new PagedIterable<Automation>(cnst("/automations.json"),
-        handleList(Automation.class, "automations"));
-  }
-
-  public Automation getAutomation(long id) {
-    return complete(submit(req("GET", tmpl("/automations/{id}.json").set("id", id)),
-        handle(Automation.class, "automation")));
-  }
-
-  public Automation createAutomation(Automation automation) {
-    return complete(submit(
-        req("POST", cnst("/automations.json"), JSON,
-            json(Collections.singletonMap("automation", automation))),
-        handle(Automation.class, "automation")));
-  }
-
-  public Automation updateAutomation(Long automationId, Automation automation) {
-    return complete(submit(
-        req("PUT", tmpl("/automations/{id}.json").set("id", automationId), JSON,
-            json(Collections.singletonMap("automation", automation))),
-        handle(Automation.class, "automation")));
-  }
-
-  public void deleteAutomation(long automationId) {
-    complete(submit(req("DELETE", tmpl("/automations/{id}.json").set("id", automationId)),
-        handleStatus()));
-  }
-
-    
-    public Iterable<TwitterMonitor> getTwitterMonitors() { 
-        return new PagedIterable<TwitterMonitor>(cnst("/channels/twitter/monitored_twitter_handles.json"),  
-              handleList(TwitterMonitor.class, "monitored_twitter_handles"));
+        return complete(submit(req("PUT", tmpl("/triggers/{id}.json").set("id", triggerId), JSON, json(Collections.singletonMap("trigger", trigger))),
+                handle(Trigger.class, "trigger")));
     }
 
-    
+    public void deleteTrigger(long triggerId) {
+        complete(submit(req("DELETE", tmpl("/triggers/{id}.json").set("id", triggerId)), handleStatus()));
+    }
+
+
+    // Automations
+    public Iterable<Automation> getAutomations() {
+        return new PagedIterable<Automation>(cnst("/automations.json"),
+                handleList(Automation.class, "automations"));
+    }
+
+    public Automation getAutomation(long id) {
+        return complete(submit(req("GET", tmpl("/automations/{id}.json").set("id", id)),
+                handle(Automation.class, "automation")));
+    }
+
+    public Automation createAutomation(Automation automation) {
+        return complete(submit(
+                req("POST", cnst("/automations.json"), JSON,
+                        json(Collections.singletonMap("automation", automation))),
+                handle(Automation.class, "automation")));
+    }
+
+    public Automation updateAutomation(Long automationId, Automation automation) {
+        return complete(submit(
+                req("PUT", tmpl("/automations/{id}.json").set("id", automationId), JSON,
+                        json(Collections.singletonMap("automation", automation))),
+                handle(Automation.class, "automation")));
+    }
+
+    public void deleteAutomation(long automationId) {
+        complete(submit(req("DELETE", tmpl("/automations/{id}.json").set("id", automationId)),
+                handleStatus()));
+    }
+
+
+    public Iterable<TwitterMonitor> getTwitterMonitors() {
+        return new PagedIterable<TwitterMonitor>(cnst("/channels/twitter/monitored_twitter_handles.json"),
+                handleList(TwitterMonitor.class, "monitored_twitter_handles"));
+    }
+
+
     public Iterable<User> getUsers() {
         return new PagedIterable<User>(cnst("/users.json"), handleList(User.class, "users"));
     }
-    
+
     public Iterable<User> getUsersByRole(String role, String... roles) {
         // Going to have to build this URI manually, because the RFC6570 template spec doesn't support
         // variables like ?role[]=...role[]=..., which is what Zendesk requires.
@@ -597,8 +597,8 @@ public class Zendesk implements Closeable {
 
     public Iterable<User> getUsersIncrementally(Date startTime) {
         return new PagedIterable<User>(
-              tmpl("/incremental/users.json{?start_time}").set("start_time", msToSeconds(startTime.getTime())), 
-              handleIncrementalList(User.class, "users"));                
+                tmpl("/incremental/users.json{?start_time}").set("start_time", msToSeconds(startTime.getTime())),
+                handleIncrementalList(User.class, "users"));
     }
 
     public Iterable<User> getGroupUsers(long id) {
@@ -874,21 +874,21 @@ public class Zendesk implements Closeable {
     public Ticket createComment(long ticketId, Comment comment) {
         Ticket ticket = new Ticket();
         ticket.setComment(comment);
-        return complete(submit(req("PUT", tmpl("/tickets/{id}.json").set("id", ticketId), JSON,              
-              json(Collections.singletonMap("ticket", ticket))),
-              handle(Ticket.class, "ticket")));
-    }    
-
-    public Ticket createTicketFromTweet(long tweetId, long monitorId) { 
-       Map<String,Object> map = new HashMap<String,Object>();
-       map.put("twitter_status_message_id", tweetId);
-       map.put("monitored_twitter_handle_id", monitorId);
-      
-       return complete(submit(req("POST", cnst("/channels/twitter/tickets.json"), JSON,              
-             json(Collections.singletonMap("ticket", map))),
-             handle(Ticket.class, "ticket")));
+        return complete(submit(req("PUT", tmpl("/tickets/{id}.json").set("id", ticketId), JSON,
+                        json(Collections.singletonMap("ticket", ticket))),
+                handle(Ticket.class, "ticket")));
     }
-    
+
+    public Ticket createTicketFromTweet(long tweetId, long monitorId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("twitter_status_message_id", tweetId);
+        map.put("monitored_twitter_handle_id", monitorId);
+
+        return complete(submit(req("POST", cnst("/channels/twitter/tickets.json"), JSON,
+                        json(Collections.singletonMap("ticket", map))),
+                handle(Ticket.class, "ticket")));
+    }
+
     public Iterable<Organization> getOrganizations() {
         return new PagedIterable<Organization>(cnst("/organizations.json"),
                 handleList(Organization.class, "organizations"));
@@ -896,8 +896,8 @@ public class Zendesk implements Closeable {
 
     public Iterable<Organization> getOrganizationsIncrementally(Date startTime) {
         return new PagedIterable<Organization>(
-            tmpl("/incremental/users.json{?start_time}").set("start_time", msToSeconds(startTime.getTime())), 
-            handleIncrementalList(Organization.class, "users"));                
+                tmpl("/incremental/users.json{?start_time}").set("start_time", msToSeconds(startTime.getTime())),
+                handleIncrementalList(Organization.class, "users"));
     }
 
     public Iterable<OrganizationField> getOrganizationFields() {
@@ -1007,27 +1007,27 @@ public class Zendesk implements Closeable {
         complete(submit(req("DELETE", tmpl("/groups/{id}.json").set("id", id)), handleStatus()));
     }
 
-    public Iterable<Macro> getMacros(){
+    public Iterable<Macro> getMacros() {
         return new PagedIterable<Macro>(cnst("/macros.json"),
                 handleList(Macro.class, "macros"));
     }
-    
-    public Macro getMacro(long macroId){
-      
-      return complete(submit(req("GET", tmpl("/macros/{id}.json").set("id", macroId)), handle(Macro.class, "macro")));
-  }
-    
-  public Macro createMacro(Macro macro) {
-    return complete(submit(
-        req("POST", cnst("/macros.json"), JSON, json(Collections.singletonMap("macro", macro))),
-        handle(Macro.class, "macro")));
-  }
 
-  public Macro updateMacro(Long macroId, Macro macro) {
-    return complete(submit(req("PUT", tmpl("/macros/{id}.json").set("id", macroId), JSON,
-        json(Collections.singletonMap("macro", macro))), handle(Macro.class, "macro")));
-  }
-    
+    public Macro getMacro(long macroId) {
+
+        return complete(submit(req("GET", tmpl("/macros/{id}.json").set("id", macroId)), handle(Macro.class, "macro")));
+    }
+
+    public Macro createMacro(Macro macro) {
+        return complete(submit(
+                req("POST", cnst("/macros.json"), JSON, json(Collections.singletonMap("macro", macro))),
+                handle(Macro.class, "macro")));
+    }
+
+    public Macro updateMacro(Long macroId, Macro macro) {
+        return complete(submit(req("PUT", tmpl("/macros/{id}.json").set("id", macroId), JSON,
+                json(Collections.singletonMap("macro", macro))), handle(Macro.class, "macro")));
+    }
+
 
     public Ticket macrosShowChangesToTicket(long macroId) {
         return complete(submit(req("GET", tmpl("/macros/{id}/apply.json").set("id", macroId)),
@@ -1291,13 +1291,13 @@ public class Zendesk implements Closeable {
                 .set("params", params),
                 handleList(type, "results"));
     }
-    
+
     public void notifyApp(String json) {
-       complete(submit(req("POST", cnst("/apps/notify.json"), JSON, json.getBytes()), handleStatus()));
+        complete(submit(req("POST", cnst("/apps/notify.json"), JSON, json.getBytes()), handleStatus()));
     }
-    
+
     public void updateInstallation(int id, String json) {
-       complete(submit(req("PUT", tmpl("/apps/installations/{id}.json").set("id", id), JSON, json.getBytes()), handleStatus()));
+        complete(submit(req("PUT", tmpl("/apps/installations/{id}.json").set("id", id), JSON, json.getBytes()), handleStatus()));
     }
 
     // TODO search with sort order
@@ -1315,6 +1315,20 @@ public class Zendesk implements Closeable {
     public Iterable<Article> getArticles() {
         return new PagedIterable<Article>(cnst("/help_center/articles.json"),
                 handleList(Article.class, "articles"));
+    }
+
+
+    public Iterable<Article> getArticles(int page, int perPage, String locale, String sortBy, String sortOrder) {
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/articles.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("page", page)
+                                .set("per_page", perPage)
+                                .set("sort_by", sortBy)
+                                .set("sort_order", sortOrder)
+                ),
+                handleList(Article.class, "articles")));
     }
 
     public List<Article> getArticlesFromPage(int page) {
@@ -1564,20 +1578,21 @@ public class Zendesk implements Closeable {
         public String getNextPage() {
             return nextPage;
         }
-        
+
         public void setNextPage(String nextPage) {
             this.nextPage = nextPage;
         }
     }
-    
+
     private class PagedAsyncListCompletionHandler<T> extends PagedAsyncCompletionHandler<List<T>> {
         private final Class<T> clazz;
         private final String name;
+
         public PagedAsyncListCompletionHandler(Class<T> clazz, String name) {
             this.clazz = clazz;
             this.name = name;
         }
-        
+
         @Override
         public List<T> onCompleted(Response response) throws Exception {
             logResponse(response);
@@ -1681,7 +1696,7 @@ public class Zendesk implements Closeable {
             }
         };
     }
-    
+
     private TemplateUri tmpl(String template) {
         return new TemplateUri(url + template);
     }
@@ -1699,7 +1714,7 @@ public class Zendesk implements Closeable {
             logger.trace("Response headers {}", response.getHeaders());
         }
     }
-    
+
     private static final String UTF_8 = "UTF-8";
 
     private static String encodeUrl(String input) {
@@ -1865,7 +1880,7 @@ public class Zendesk implements Closeable {
         mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
         mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);        
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper;
     }
 
