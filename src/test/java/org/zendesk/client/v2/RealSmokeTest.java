@@ -11,6 +11,7 @@ import org.zendesk.client.v2.model.Field;
 import org.zendesk.client.v2.model.Group;
 import org.zendesk.client.v2.model.Identity;
 import org.zendesk.client.v2.model.JobStatus;
+import org.zendesk.client.v2.model.Locale;
 import org.zendesk.client.v2.model.Organization;
 import org.zendesk.client.v2.model.Request;
 import org.zendesk.client.v2.model.Status;
@@ -637,5 +638,18 @@ public class RealSmokeTest {
             }
 
         }
+    }
+
+    @Test
+    public void shouldLoadAllLocales() throws Exception
+    {
+        createClientWithTokenOrPassword();
+
+        List<Locale> locales = instance.getLocales();
+
+        assertTrue(locales.size() >= 1);
+        assertNotNull(locales.get(0).getId());
+        assertNotNull(locales.get(0).getLocale());
+        assertNotNull(locales.get(0).getName());
     }
 }
