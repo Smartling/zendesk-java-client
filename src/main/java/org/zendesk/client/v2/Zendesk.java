@@ -309,6 +309,63 @@ public class Zendesk implements Closeable {
                 .set("query", searchTerm).set("section", sectionId), handleList(Article.class, "results"));
     }
 
+    public Iterable<Article> getArticlesBySection(int page, int perPage, Long sectionId) {
+        if (sectionId == null) {
+            throw new IllegalArgumentException(String.format("Param %s cannot be null", "sectionId"));
+        }
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&section={section}")
+                .set("page", page)
+                .set("per_page", perPage)
+                .set("section", sectionId)
+                , handleList(Article.class, "results"));
+    }
+
+    public Iterable<Article> getArticlesByCategory(int page, int perPage, Long categoryId) {
+        if (categoryId == null) {
+            throw new IllegalArgumentException(String.format("Param %s cannot be null", "categoryId"));
+        }
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&category={category}")
+                .set("page", page)
+                .set("per_page", perPage)
+                .set("category", categoryId)
+                , handleList(Article.class, "results"));
+    }
+
+    public Iterable<Article> getArticlesByQuery(int page, int perPage, String searchTerm) {
+        if (searchTerm == null) {
+            throw new IllegalArgumentException(String.format("Param %s cannot be null", "searchTerm"));
+        }
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&query={query}")
+                .set("page", page)
+                .set("per_page", perPage)
+                .set("query", searchTerm)
+                , handleList(Article.class, "results"));
+    }
+
+    public Iterable<Article> getArticlesByQueryAndSection(int page, int perPage, String searchTerm, Long sectionId) {
+        if (searchTerm == null || sectionId == null) {
+            throw new IllegalArgumentException(String.format("Non of Params %s cannot be null", "searchTerm/sectionId"));
+        }
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&query={query}&section={section}")
+                .set("page", page)
+                .set("per_page", perPage)
+                .set("query", searchTerm)
+                .set("section", sectionId)
+                , handleList(Article.class, "results"));
+    }
+
+    public Iterable<Article> getArticlesByQueryAndCategory(int page, int perPage, String searchTerm, Long categoryId) {
+        if (searchTerm == null || categoryId == null) {
+            throw new IllegalArgumentException(String.format("Non of Params %s cannot be null", "searchTerm/categoryId"));
+        }
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&query={query}&category={category}")
+                .set("page", page)
+                .set("per_page", perPage)
+                .set("query", searchTerm)
+                .set("category", categoryId)
+                , handleList(Article.class, "results"));
+    }
+
     public List<ArticleAttachments> getAttachmentsFromArticle(Long articleID) {
         return complete(submit(req("GET", tmpl("/help_center/articles/{?query}/attachments.json").set("query", articleID)),
                 handleList(ArticleAttachments.class, "articles")));

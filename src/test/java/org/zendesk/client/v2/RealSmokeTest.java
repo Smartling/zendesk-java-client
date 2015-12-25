@@ -1,6 +1,7 @@
 package org.zendesk.client.v2;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -76,6 +77,19 @@ public class RealSmokeTest {
                 true));
     }
 
+    private Long sectionId;
+    private Long categoryId;
+    private String queryString;
+
+    @Before
+    public void init() throws Exception {
+        sectionId = Long.valueOf(config.getProperty("sectionId"));
+        categoryId = Long.valueOf(config.getProperty("categoryId"));
+        queryString = config.getProperty("queryString");
+
+        createClientWithTokenOrPassword();
+    }
+
     @After
     public void closeClient() {
         if (instance != null) {
@@ -108,7 +122,6 @@ public class RealSmokeTest {
 
     @Test
     public void getTicket() throws Exception {
-        createClientWithTokenOrPassword();
         Ticket ticket = instance.getTicket(1);
         assertThat(ticket, notNullValue());
     }
@@ -116,7 +129,6 @@ public class RealSmokeTest {
     @Test
     @Ignore("Needs specfic ticket form instance")
     public void getTicketForm() throws Exception {
-        createClientWithTokenOrPassword();
         TicketForm ticketForm = instance.getTicketForm(27562);
         assertThat(ticketForm, notNullValue());
         assertTrue(ticketForm.isEndUserVisible());
@@ -125,7 +137,6 @@ public class RealSmokeTest {
     @Test
     @Ignore
     public void getTicketForms() throws Exception {
-        createClientWithTokenOrPassword();
         Iterable<TicketForm> ticketForms = instance.getTicketForms();
         assertTrue(ticketForms.iterator().hasNext());
         for (TicketForm ticketForm : ticketForms) {
@@ -136,7 +147,6 @@ public class RealSmokeTest {
     @Test
     @Ignore("Needs specfic ticket form instance")
     public void getTicketFieldsOnForm() throws Exception {
-        createClientWithTokenOrPassword();
         TicketForm ticketForm = instance.getTicketForm(27562);
         for (Integer id : ticketForm.getTicketFieldIds()) {
             Field f = instance.getTicketField(id);
@@ -148,7 +158,6 @@ public class RealSmokeTest {
 
     @Test
     public void getTargets() throws Exception {
-        createClientWithTokenOrPassword();
         Long firstTargetId = null;
         for (Target target : instance.getTargets()) {
             assertNotNull(target);
@@ -163,7 +172,6 @@ public class RealSmokeTest {
     @Test
     @Ignore("Needs test data setup correctly")
     public void getTicketsPagesRequests() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Ticket t : instance.getTickets()) {
             assertThat(t.getSubject(), notNullValue());
@@ -177,7 +185,6 @@ public class RealSmokeTest {
     @Test
     @Ignore("Needs test data setup correctly")
     public void getRecentTickets() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Ticket t : instance.getRecentTickets()) {
             assertThat(t.getSubject(), notNullValue());
@@ -191,7 +198,6 @@ public class RealSmokeTest {
     @Test
     @Ignore
     public void getTicketsById() throws Exception {
-        createClientWithTokenOrPassword();
         long count = 1;
         for (Ticket t : instance.getTickets(1, 6, 11)) {
             assertThat(t.getSubject(), notNullValue());
@@ -203,7 +209,6 @@ public class RealSmokeTest {
 
     @Test
     public void getTicketsIncrementally() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Ticket t : instance.getTicketsIncrementally(new Date(0L))) {
             assertThat(t.getId(), notNullValue());
@@ -215,7 +220,6 @@ public class RealSmokeTest {
 
     @Test
     public void getTicketAudits() throws Exception {
-        createClientWithTokenOrPassword();
         for (Audit a : instance.getTicketAudits(1L)) {
             assertThat(a, notNullValue());
             assertThat(a.getEvents(), not(Collections.<Event>emptyList()));
@@ -224,7 +228,6 @@ public class RealSmokeTest {
 
     @Test
     public void getTicketFields() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Field f : instance.getTicketFields()) {
             assertThat(f, notNullValue());
@@ -257,7 +260,6 @@ public class RealSmokeTest {
     @Test
     @Ignore("Don't spam zendesk")
     public void createDeleteTicket() throws Exception {
-        createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
         Ticket t = new Ticket(
                 new Ticket.Requester(config.getProperty("requester.name"), config.getProperty("requester.email")),
@@ -288,7 +290,6 @@ public class RealSmokeTest {
     @Test
     @Ignore("Don't spam zendesk")
     public void createSolveTickets() throws Exception {
-        createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
         Ticket ticket;
         long firstId = Long.MAX_VALUE;
@@ -316,7 +317,6 @@ public class RealSmokeTest {
 
     @Test
     public void lookupUserByEmail() throws Exception {
-        createClientWithTokenOrPassword();
         String requesterEmail = config.getProperty("requester.email");
         assumeThat("Must have a requester email", requesterEmail, notNullValue());
         for (User user : instance.lookupUserByEmail(requesterEmail)) {
@@ -326,7 +326,6 @@ public class RealSmokeTest {
 
     @Test
     public void searchUserByEmail() throws Exception {
-        createClientWithTokenOrPassword();
         String requesterEmail = config.getProperty("requester.email");
         assumeThat("Must have a requester email", requesterEmail, notNullValue());
         for (User user : instance.getSearchResults(User.class, "requester:" + requesterEmail)) {
@@ -336,7 +335,6 @@ public class RealSmokeTest {
 
     @Test
     public void lookupUserIdentities() throws Exception {
-        createClientWithTokenOrPassword();
         User user = instance.getCurrentUser();
         for (Identity i : instance.getUserIdentities(user)) {
             assertThat(i.getId(), notNullValue());
@@ -349,7 +347,6 @@ public class RealSmokeTest {
 
     @Test
     public void getUserRequests() throws Exception {
-        createClientWithTokenOrPassword();
         User user = instance.getCurrentUser();
         int count = 5;
         for (Request r : instance.getUserRequests(user)) {
@@ -367,7 +364,6 @@ public class RealSmokeTest {
 
     @Test
     public void getUsers() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (User u : instance.getUsers()) {
             assertThat(u.getName(), notNullValue());
@@ -379,7 +375,6 @@ public class RealSmokeTest {
 
     @Test
     public void getUsersIncrementally() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (User u : instance.getUsersIncrementally(new Date(0L))) {
             assertThat(u.getName(), notNullValue());
@@ -391,7 +386,6 @@ public class RealSmokeTest {
 
     @Test
     public void getOrganizations() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Organization t : instance.getOrganizations()) {
             assertThat(t.getName(), notNullValue());
@@ -403,7 +397,6 @@ public class RealSmokeTest {
 
     @Test
     public void getOrganizationsIncrementally() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Organization t : instance.getOrganizationsIncrementally(new Date(0L))) {
             assertThat(t.getName(), notNullValue());
@@ -415,11 +408,9 @@ public class RealSmokeTest {
 
     @Test
     public void createOrganization() throws Exception {
-        createClientWithTokenOrPassword();
-
         // Clean up to avoid conflicts
         for (Organization t : instance.getOrganizations()) {
-            if ("testorg".equals(t.getExternalId())) {
+            if ("testorg" .equals(t.getExternalId())) {
                 instance.deleteOrganization(t);
             }
         }
@@ -437,11 +428,9 @@ public class RealSmokeTest {
 
     @Test(timeout = 10000)
     public void createOrganizations() throws Exception {
-        createClientWithTokenOrPassword();
-
         // Clean up to avoid conflicts
         for (Organization t : instance.getOrganizations()) {
-            if ("testorg1".equals(t.getExternalId()) || "testorg2".equals(t.getExternalId())) {
+            if ("testorg1" .equals(t.getExternalId()) || "testorg2" .equals(t.getExternalId())) {
                 instance.deleteOrganization(t);
             }
         }
@@ -477,8 +466,6 @@ public class RealSmokeTest {
 
     @Test(timeout = 10000)
     public void bulkCreateMultipleJobs() throws Exception {
-        createClientWithTokenOrPassword();
-
         List<Organization> orgs = new ArrayList<Organization>(4);
         for (int i = 1; i <= 5; i++) {
             Organization org = new Organization();
@@ -528,7 +515,6 @@ public class RealSmokeTest {
 
     @Test
     public void getGroups() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Group t : instance.getGroups()) {
             assertThat(t.getName(), notNullValue());
@@ -540,7 +526,6 @@ public class RealSmokeTest {
 
     @Test
     public void getArticles() throws Exception {
-        createClientWithTokenOrPassword();
         int count = 0;
         for (Article t : instance.getArticles()) {
             assertThat(t.getTitle(), notNullValue());
@@ -552,8 +537,6 @@ public class RealSmokeTest {
 
     @Test
     public void shouldReturnArticlesForSingleLocale() throws Exception {
-        createClientWithTokenOrPassword();
-
         Iterable<Article> articlesForSpecificLocale = instance.getArticles(1, 20, "en-us", "updated_at", "asc");
 
         for (Article article : articlesForSpecificLocale) {
@@ -563,8 +546,6 @@ public class RealSmokeTest {
 
     @Test
     public void sizeShouldShouldBeNotMoreThanPerPageSize() throws Exception {
-        createClientWithTokenOrPassword();
-
         Iterable<Article> articlesForSpecificLocale = instance.getArticles(1, 20, "en-us", "updated_at", "asc");
 
         List<Article> articleList = new ArrayList<>();
@@ -576,8 +557,6 @@ public class RealSmokeTest {
 
     @Test
     public void shouldBeSortedByTitleInAsc() throws Exception {
-        createClientWithTokenOrPassword();
-
         Iterable<Article> articlesForSpecificLocale = instance.getArticles(1, 20, "en-us", "title", "asc");
 
         String previous = null;
@@ -598,8 +577,6 @@ public class RealSmokeTest {
 
     @Test
     public void shouldBeSortedByUpdatedAtInAsc() throws Exception {
-        createClientWithTokenOrPassword();
-
         Iterable<Article> articlesForSpecificLocale = instance.getArticles(1, 20, "en-us", "updated_at", "asc");
 
         Date previous = null;
@@ -620,8 +597,6 @@ public class RealSmokeTest {
 
     @Test
     public void shouldBeSortedByTitleInDesc() throws Exception {
-        createClientWithTokenOrPassword();
-
         Iterable<Article> articlesForSpecificLocale = instance.getArticles(1, 20, "en-us", "title", "desc");
 
         String previous = null;
@@ -641,10 +616,7 @@ public class RealSmokeTest {
     }
 
     @Test
-    public void shouldLoadAllLocales() throws Exception
-    {
-        createClientWithTokenOrPassword();
-
+    public void shouldLoadAllLocales() throws Exception {
         List<Locale> locales = instance.getLocales();
 
         assertTrue(locales.size() >= 1);
@@ -652,4 +624,97 @@ public class RealSmokeTest {
         assertNotNull(locales.get(0).getLocale());
         assertNotNull(locales.get(0).getName());
     }
+
+    @Test
+    public void shouldSearchArticleByCategory() throws Exception {
+        Iterable<Article> articleFromSearch = instance.getArticlesByCategory(1, 10, categoryId);
+        List<Article> result = new ArrayList<>();
+        for (Article article : articleFromSearch) {
+            result.add(article);
+        }
+
+        assertEquals(9, new ArrayList(result).size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfCategoryNotProvided() throws Exception {
+        instance.getArticlesByCategory(1, 10, null);
+
+    }
+
+    @Test
+    public void shouldSearchArticleBySection() throws Exception {
+        Iterable<Article> articleFromSearch = instance.getArticlesBySection(1, 10, sectionId);
+        List<Article> result = new ArrayList<>();
+        for (Article article : articleFromSearch) {
+            result.add(article);
+        }
+
+        assertEquals(5, new ArrayList(result).size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfSectionNotProvided() throws Exception {
+        instance.getArticlesBySection(1, 10, null);
+
+    }
+
+    @Test
+    public void shouldSearchArticleByQuery() throws Exception {
+        Iterable<Article> articleFromSearch = instance.getArticlesByQuery(1, 10, queryString);
+        List<Article> result = new ArrayList<>();
+        for (Article article : articleFromSearch) {
+            result.add(article);
+        }
+
+        assertEquals(7, new ArrayList(result).size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfQueryNotProvided() throws Exception {
+        instance.getArticlesByQuery(1, 10, null);
+    }
+
+    @Test
+    public void shouldSearchArticleByQueryInOneCategory() throws Exception {
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, queryString, categoryId);
+        List<Article> result = new ArrayList<>();
+        for (Article article : articleFromSearch) {
+            result.add(article);
+        }
+
+        assertEquals(6, new ArrayList(result).size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfCategoryNotProvidedWhenSearchingByQueryAndCategory() throws Exception {
+        instance.getArticlesByQueryAndCategory(1, 10, queryString, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfQueryNotProvidedWhenSearchingByQueryAndCategory() throws Exception {
+        instance.getArticlesByQueryAndCategory(1, 10, null, Long.valueOf(42));
+    }
+
+    @Test
+    public void shouldSearchArticleByQueryInOneSection() throws Exception {
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, queryString, sectionId);
+        List<Article> result = new ArrayList<>();
+        for (Article article : articleFromSearch) {
+            result.add(article);
+        }
+
+        assertEquals(4, new ArrayList(result).size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfSectionNotProvidedWhenSearchingByQueryAndSection() throws Exception {
+        instance.getArticlesByQueryAndCategory(1, 10, queryString, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfQueryNotProvidedWhenSearchingByQueryAndSection() throws Exception {
+        instance.getArticlesByQueryAndCategory(1, 10, null, Long.valueOf(42));
+    }
+
 }
