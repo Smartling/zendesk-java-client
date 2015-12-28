@@ -548,10 +548,7 @@ public class RealSmokeTest {
     public void sizeShouldShouldBeNotMoreThanPerPageSize() throws Exception {
         Iterable<Article> articlesForSpecificLocale = instance.getArticles(1, 20, "en-us", "updated_at", "asc");
 
-        List<Article> articleList = new ArrayList<>();
-        for (Article article : articlesForSpecificLocale) {
-            articleList.add(article);
-        }
+        List<Article> articleList = getList(articlesForSpecificLocale);
         assertTrue(articleList.size() <= 20);
     }
 
@@ -628,46 +625,25 @@ public class RealSmokeTest {
     @Test
     public void shouldSearchArticleByCategory() throws Exception {
         Iterable<Article> articleFromSearch = instance.getArticlesByCategory(1, 10, categoryId);
-        List<Article> result = new ArrayList<>();
-        for (Article article : articleFromSearch) {
-            result.add(article);
-        }
 
-        assertEquals(9, new ArrayList(result).size());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfCategoryNotProvided() throws Exception {
-        instance.getArticlesByCategory(1, 10, null);
-
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), new ArrayList(result).size());
     }
 
     @Test
     public void shouldSearchArticleBySection() throws Exception {
         Iterable<Article> articleFromSearch = instance.getArticlesBySection(1, 10, sectionId);
-        List<Article> result = new ArrayList<>();
-        for (Article article : articleFromSearch) {
-            result.add(article);
-        }
 
-        assertEquals(5, new ArrayList(result).size());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfSectionNotProvided() throws Exception {
-        instance.getArticlesBySection(1, 10, null);
-
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
     }
 
     @Test
     public void shouldSearchArticleByQuery() throws Exception {
         Iterable<Article> articleFromSearch = instance.getArticlesByQuery(1, 10, queryString);
-        List<Article> result = new ArrayList<>();
-        for (Article article : articleFromSearch) {
-            result.add(article);
-        }
 
-        assertEquals(7, new ArrayList(result).size());
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query")), result.size());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -678,43 +654,40 @@ public class RealSmokeTest {
     @Test
     public void shouldSearchArticleByQueryInOneCategory() throws Exception {
         Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, queryString, categoryId);
-        List<Article> result = new ArrayList<>();
-        for (Article article : articleFromSearch) {
-            result.add(article);
-        }
 
-        assertEquals(6, new ArrayList(result).size());
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.category")), result.size());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfCategoryNotProvidedWhenSearchingByQueryAndCategory() throws Exception {
-        instance.getArticlesByQueryAndCategory(1, 10, queryString, null);
-    }
+    @Test
+    public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentCategoryId() throws Exception {
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndCategory(1, 10, null, 0);
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfQueryNotProvidedWhenSearchingByQueryAndCategory() throws Exception {
-        instance.getArticlesByQueryAndCategory(1, 10, null, Long.valueOf(42));
+        assertTrue(getList(articlesByQueryAndCategory).isEmpty());
     }
 
     @Test
     public void shouldSearchArticleByQueryInOneSection() throws Exception {
         Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, queryString, sectionId);
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.section")), result.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentSectionId() throws Exception {
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndSection(1, 10, null, 0);
+
+        assertTrue(getList(articlesByQueryAndCategory).isEmpty());
+    }
+
+
+    private List<Article> getList(Iterable<Article> iterables)
+    {
         List<Article> result = new ArrayList<>();
-        for (Article article : articleFromSearch) {
+        for (Article article : iterables) {
             result.add(article);
         }
-
-        assertEquals(4, new ArrayList(result).size());
+        return result;
     }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfSectionNotProvidedWhenSearchingByQueryAndSection() throws Exception {
-        instance.getArticlesByQueryAndCategory(1, 10, queryString, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldThrowExceptionIfQueryNotProvidedWhenSearchingByQueryAndSection() throws Exception {
-        instance.getArticlesByQueryAndCategory(1, 10, null, Long.valueOf(42));
-    }
-
 }
