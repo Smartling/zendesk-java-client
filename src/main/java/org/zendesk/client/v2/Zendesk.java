@@ -309,22 +309,6 @@ public class Zendesk implements Closeable {
                 .set("query", searchTerm).set("section", sectionId), handleList(Article.class, "results"));
     }
 
-    public Iterable<Article> getArticlesBySection(int page, int perPage, long sectionId) {
-        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&section={section}")
-                .set("page", page)
-                .set("per_page", perPage)
-                .set("section", sectionId)
-                , handleList(Article.class, "results"));
-    }
-
-    public Iterable<Article> getArticlesByCategory(int page, int perPage, long categoryId) {
-        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&category={category}")
-                .set("page", page)
-                .set("per_page", perPage)
-                .set("category", categoryId)
-                , handleList(Article.class, "results"));
-    }
-
     public Iterable<Article> getArticlesByQuery(int page, int perPage, String searchTerm) {
         if (searchTerm == null) {
             throw new IllegalArgumentException(String.format("Param %s cannot be null", "searchTerm"));

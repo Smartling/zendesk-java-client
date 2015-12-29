@@ -624,15 +624,15 @@ public class RealSmokeTest {
 
     @Test
     public void shouldSearchArticleByCategory() throws Exception {
-        Iterable<Article> articleFromSearch = instance.getArticlesByCategory(1, 10, categoryId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, null, categoryId);
 
         List<Article> result = getList(articleFromSearch);
-        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), new ArrayList(result).size());
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), result.size());
     }
 
     @Test
     public void shouldSearchArticleBySection() throws Exception {
-        Iterable<Article> articleFromSearch = instance.getArticlesBySection(1, 10, sectionId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, null, sectionId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
