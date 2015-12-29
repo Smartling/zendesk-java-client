@@ -1,19 +1,22 @@
 package org.zendesk.client.v2;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.ListenableFuture;
-import com.ning.http.client.Realm;
-import com.ning.http.client.Request;
-import com.ning.http.client.RequestBuilder;
-import com.ning.http.client.Response;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zendesk.client.v2.model.Attachment;
@@ -45,6 +48,7 @@ import org.zendesk.client.v2.model.hc.Article;
 import org.zendesk.client.v2.model.hc.ArticleAttachments;
 import org.zendesk.client.v2.model.hc.Category;
 import org.zendesk.client.v2.model.hc.Section;
+import org.zendesk.client.v2.model.hc.Translation;
 import org.zendesk.client.v2.model.targets.BasecampTarget;
 import org.zendesk.client.v2.model.targets.CampfireTarget;
 import org.zendesk.client.v2.model.targets.EmailTarget;
@@ -53,22 +57,20 @@ import org.zendesk.client.v2.model.targets.Target;
 import org.zendesk.client.v2.model.targets.TwitterTarget;
 import org.zendesk.client.v2.model.targets.UrlTarget;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.ListenableFuture;
+import com.ning.http.client.Realm;
+import com.ning.http.client.Request;
+import com.ning.http.client.RequestBuilder;
+import com.ning.http.client.Response;
 
 /**
  * @author stephenc
@@ -1483,6 +1485,43 @@ public class Zendesk implements Closeable {
         return complete(submit(req("GET", cnst("/locales.json")), handleList(Locale.class, "locales")));
     }
 
+    /**
+     * Translations API
+     * See https://developer.zendesk.com/rest_api/docs/help_center/translations.html
+     */
+    public Translation getTranslation(Translation.SourceType sourceType, Long sourceId, String locale)
+    {
+        return complete(submit(req("GET", tmpl("/help_center/{source_path}/{source_id}/translations/{locale}.json")
+                    .set("source_path", sourceType.getUrlPath()).set("source_id", sourceId).set("locale", locale)),
+                handle(Translation.class, "translation")));
+    }
+
+    public Translation createTranslation(Translation translation)
+    {
+        checkHasSourceTypeAndIdAndLocale(translation);
+        return complete(submit(req("POST", tmpl("/help_center/{source_path}/{source_id}/translations.json")
+                    .set("source_path", Translation.SourceType.getBySourceName(translation.getSourceType()).getUrlPath())
+                    .set("source_id", translation.getSourceId()), JSON,
+                json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+    }
+
+    public Translation updateTranslation(Translation translation)
+    {
+        checkHasSourceTypeAndIdAndLocale(translation);
+        return complete(submit(req("PUT", tmpl("/help_center/{source_path}/{source_id}/translations/{locale}.json")
+                    .set("source_path", Translation.SourceType.getBySourceName(translation.getSourceType()).getUrlPath())
+                    .set("source_id", translation.getSourceId())
+                    .set("locale", translation.getLocale()), JSON,
+                json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+    }
+
+    public void deleteTranslation(Translation translation)
+    {
+        checkHasId(translation);
+        complete(submit(req("DELETE", tmpl("/help_center/translations/{id}.json").set("id", translation.getId())),
+                handleStatus()));
+    }
+
     //////////////////////////////////////////////////////////////////////
     // Helper methods
     //////////////////////////////////////////////////////////////////////
@@ -1914,6 +1953,24 @@ public class Zendesk implements Closeable {
     private static void checkHasId(Section section) {
         if (section.getId() == null) {
             throw new IllegalArgumentException("Section requires id");
+        }
+    }
+
+    private static void checkHasId(Translation translation) {
+        if (translation.getId() == null) {
+            throw new IllegalArgumentException("Translation requires id");
+        }
+    }
+
+    private static void checkHasSourceTypeAndIdAndLocale(Translation translation) {
+        if (translation.getSourceType() == null || 0 == translation.getSourceType().length()) {
+            throw new IllegalArgumentException("Translation requires sourceType");
+        }
+        if (translation.getSourceId() == null) {
+            throw new IllegalArgumentException("Translation requires sourceId");
+        }
+        if (translation.getLocale() == null || 0 == translation.getLocale().length()) {
+            throw new IllegalArgumentException("Translation requires locale");
         }
     }
 
