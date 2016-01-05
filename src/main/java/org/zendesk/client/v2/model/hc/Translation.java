@@ -33,7 +33,7 @@ public class Translation
         public static SourceType getBySourceName(String sourceName)
         {
             Optional<SourceType> type = Arrays.stream(SourceType.values()).filter(t -> t.getSourceType().equals(sourceName)).findFirst();
-            return type.isPresent() ? type.get() : null;
+            return type.get();
         }
     };
 

@@ -1,9 +1,9 @@
 package org.zendesk.client.v2.model.hc;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Section {
     /** Automatically assigned when creating subscriptions */
@@ -11,6 +11,9 @@ public class Section {
 
     /** The name of the section */
     private String name;
+
+    /** The description of the section */
+    private String description;
 
     /** The locale in which the section is displayed */
     private String locale;
@@ -28,7 +31,7 @@ public class Section {
 
     /** The id of the category to which this section belongs */
     @JsonProperty("category_id")
-    private String categoryId;
+    private Long categoryId;
 
     /** Whether the section is out of date */
     private Boolean outdated;
@@ -64,6 +67,14 @@ public class Section {
         this.name = name;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getLocale() {
         return locale;
     }
@@ -96,11 +107,11 @@ public class Section {
         this.htmlUrl = htmlUrl;
     }
 
-    public String getCategoryId() {
+    public Long getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(String categoryId) {
+    public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 
@@ -149,11 +160,12 @@ public class Section {
         return "Section{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
                 ", locale='" + locale + '\'' +
                 ", sourceLocale='" + sourceLocale + '\'' +
                 ", url='" + url + '\'' +
                 ", htmlUrl='" + htmlUrl + '\'' +
-                ", categoryId='" + categoryId + '\'' +
+                ", categoryId=" + categoryId +
                 ", outdated=" + outdated +
                 ", position=" + position +
                 ", translation_ids=" + translation_ids +
