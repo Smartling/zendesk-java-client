@@ -42,6 +42,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNotNull;
 import static org.junit.Assume.assumeThat;
 
 /**
@@ -51,6 +52,10 @@ import static org.junit.Assume.assumeThat;
 public class RealSmokeTest {
 
     private static Properties config;
+
+    private Long sectionId;
+    private Long categoryId;
+    private String queryString;
 
     private Zendesk instance;
 
@@ -77,17 +82,18 @@ public class RealSmokeTest {
                 true));
     }
 
-    private Long sectionId;
-    private Long categoryId;
-    private String queryString;
-
     @Before
     public void init() throws Exception {
-        sectionId = Long.valueOf(config.getProperty("sectionId"));
-        categoryId = Long.valueOf(config.getProperty("categoryId"));
+        sectionId = parseLongOrNull(config.getProperty("sectionId"));
+        categoryId = parseLongOrNull(config.getProperty("categoryId"));
         queryString = config.getProperty("queryString");
 
         createClientWithTokenOrPassword();
+    }
+
+    private static Long parseLongOrNull(final String string)
+    {
+        return string != null ? Long.valueOf(string) : null;
     }
 
     @After
@@ -624,6 +630,8 @@ public class RealSmokeTest {
 
     @Test
     public void shouldSearchArticleByCategory() throws Exception {
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
         Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, null, categoryId);
 
         List<Article> result = getList(articleFromSearch);
@@ -632,6 +640,8 @@ public class RealSmokeTest {
 
     @Test
     public void shouldSearchArticleBySection() throws Exception {
+        assumeNotNull("Section ID is required to run this test", sectionId);
+
         Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, null, sectionId);
 
         List<Article> result = getList(articleFromSearch);
@@ -640,6 +650,8 @@ public class RealSmokeTest {
 
     @Test
     public void shouldSearchArticleByQuery() throws Exception {
+        assumeNotNull("Search query is required to run this test", queryString);
+
         Iterable<Article> articleFromSearch = instance.getArticlesByQuery(1, 10, queryString);
 
         List<Article> result = getList(articleFromSearch);
@@ -653,6 +665,9 @@ public class RealSmokeTest {
 
     @Test
     public void shouldSearchArticleByQueryInOneCategory() throws Exception {
+        assumeNotNull("Search query is required to run this test", queryString);
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
         Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, queryString, categoryId);
 
         List<Article> result = getList(articleFromSearch);
@@ -668,6 +683,9 @@ public class RealSmokeTest {
 
     @Test
     public void shouldSearchArticleByQueryInOneSection() throws Exception {
+        assumeNotNull("Search query is required to run this test", queryString);
+        assumeNotNull("Section ID is required to run this test", sectionId);
+
         Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, queryString, sectionId);
 
         List<Article> result = getList(articleFromSearch);
@@ -682,10 +700,10 @@ public class RealSmokeTest {
     }
 
 
-    private List<Article> getList(Iterable<Article> iterables)
+    private List<Article> getList(Iterable<Article> iterable)
     {
         List<Article> result = new ArrayList<>();
-        for (Article article : iterables) {
+        for (Article article : iterable) {
             result.add(article);
         }
         return result;
