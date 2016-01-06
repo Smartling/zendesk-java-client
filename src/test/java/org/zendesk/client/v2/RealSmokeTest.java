@@ -632,7 +632,7 @@ public class RealSmokeTest {
     public void shouldSearchArticleByCategory() throws Exception {
         assumeNotNull("Category ID is required to run this test", categoryId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, null, categoryId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, "en-us", null, categoryId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), result.size());
@@ -642,7 +642,7 @@ public class RealSmokeTest {
     public void shouldSearchArticleBySection() throws Exception {
         assumeNotNull("Section ID is required to run this test", sectionId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, null, sectionId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, "en-us", null, sectionId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
@@ -652,7 +652,7 @@ public class RealSmokeTest {
     public void shouldSearchArticleByQuery() throws Exception {
         assumeNotNull("Search query is required to run this test", queryString);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByQuery(1, 10, queryString);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQuery(1, 10, "en-us", queryString);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query")), result.size());
@@ -660,7 +660,7 @@ public class RealSmokeTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionIfQueryNotProvided() throws Exception {
-        instance.getArticlesByQuery(1, 10, null);
+        instance.getArticlesByQuery(1, 10, "en-us", null);
     }
 
     @Test
@@ -668,7 +668,7 @@ public class RealSmokeTest {
         assumeNotNull("Search query is required to run this test", queryString);
         assumeNotNull("Category ID is required to run this test", categoryId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, queryString, categoryId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndCategory(1, 10, "en-us", queryString, categoryId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.category")), result.size());
@@ -676,7 +676,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentCategoryId() throws Exception {
-        Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndCategory(1, 10, null, 0);
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndCategory(1, 10, "en-us", null, 0);
 
         assertTrue(getList(articlesByQueryAndCategory).isEmpty());
     }
@@ -686,7 +686,7 @@ public class RealSmokeTest {
         assumeNotNull("Search query is required to run this test", queryString);
         assumeNotNull("Section ID is required to run this test", sectionId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, queryString, sectionId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, "en-us", queryString, sectionId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.section")), result.size());
@@ -694,7 +694,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentSectionId() throws Exception {
-        Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndSection(1, 10, null, 0);
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndSection(1, 10, "en-us", null, 0);
 
         assertTrue(getList(articlesByQueryAndCategory).isEmpty());
     }
