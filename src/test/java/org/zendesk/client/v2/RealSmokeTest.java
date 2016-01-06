@@ -42,8 +42,10 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNoException;
 import static org.junit.Assume.assumeNotNull;
 import static org.junit.Assume.assumeThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author stephenc
@@ -699,6 +701,30 @@ public class RealSmokeTest {
         assertTrue(getList(articlesByQueryAndCategory).isEmpty());
     }
 
+    @Test
+    public void shouldGetArticleByLocaleAndId() throws Exception
+    {
+        Article existingArticle = getRandomArticle();
+
+        Article loadedArticle = instance.getArticle("en-us", existingArticle.getId().intValue());
+
+        assertEquals(loadedArticle.getId(), existingArticle.getId());
+    }
+
+    private Article getRandomArticle()
+    {
+        Article existingArticle = null;
+        try {
+            Iterable<Article> articles = instance.getArticles();
+            assumeTrue("At least one article is needed for this test", articles.iterator().hasNext());
+
+            existingArticle = articles.iterator().next();
+        } catch (ZendeskException e) {
+            assumeNoException("Need to be able to fetch articles to run this test", e);
+        }
+
+        return existingArticle;
+    }
 
     private List<Article> getList(Iterable<Article> iterable)
     {
