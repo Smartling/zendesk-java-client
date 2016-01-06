@@ -1422,6 +1422,12 @@ public class Zendesk implements Closeable {
                 handle(Category.class, "category")));
     }
 
+    public Category getCategory(String locale, int id) {
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/categories/{id}.json")
+                .set("id", id).set("locale", locale)),
+                handle(Category.class, "category")));
+    }
+
     public Category createCategory(Category category) {
         return complete(submit(req("POST", cnst("/help_center/categories.json"),
                 JSON, json(Collections.singletonMap("category", category))), handle(Category.class, "category")));
@@ -1465,6 +1471,12 @@ public class Zendesk implements Closeable {
 
     public Section getSection(int id) {
         return complete(submit(req("GET", tmpl("/help_center/sections/{id}.json").set("id", id)),
+                handle(Section.class, "section")));
+    }
+
+    public Section getSection(String locale, int id) {
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/sections/{id}.json")
+                .set("id", id).set("locale", locale)),
                 handle(Section.class, "section")));
     }
 

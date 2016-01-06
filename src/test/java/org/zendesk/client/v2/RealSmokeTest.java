@@ -21,6 +21,8 @@ import org.zendesk.client.v2.model.TicketForm;
 import org.zendesk.client.v2.model.User;
 import org.zendesk.client.v2.model.events.Event;
 import org.zendesk.client.v2.model.hc.Article;
+import org.zendesk.client.v2.model.hc.Category;
+import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.targets.Target;
 
 import java.util.ArrayList;
@@ -711,6 +713,26 @@ public class RealSmokeTest {
         assertEquals(loadedArticle.getId(), existingArticle.getId());
     }
 
+    @Test
+    public void shouldGetCategoryByLocaleAndId() throws Exception
+    {
+        Category existingCategory = getRandomCategory();
+
+        Category loadedCategory = instance.getCategory("en-us", existingCategory.getId().intValue());
+
+        assertEquals(loadedCategory.getId(), existingCategory.getId());
+    }
+
+    @Test
+    public void shouldGetSectionByLocaleAndId() throws Exception
+    {
+        Section existingSection = getRandomSection();
+
+        Section loadedCategory = instance.getSection("en-us",existingSection.getId().intValue());
+
+        assertEquals(loadedCategory.getId(), existingSection.getId());
+    }
+
     private Article getRandomArticle()
     {
         Article existingArticle = null;
@@ -724,6 +746,36 @@ public class RealSmokeTest {
         }
 
         return existingArticle;
+    }
+
+    private Category getRandomCategory()
+    {
+        Category existingCategory = null;
+        try {
+            Iterable<Category> categories = instance.getCategories();
+            assumeTrue("At least one category is needed for this test", categories.iterator().hasNext());
+
+            existingCategory = categories.iterator().next();
+        } catch (ZendeskException e) {
+            assumeNoException("Need to be able to fetch category to run this test", e);
+        }
+
+        return existingCategory;
+    }
+
+    private Section getRandomSection()
+    {
+        Section existingSection = null;
+        try {
+            Iterable<Section> sections = instance.getSections();
+            assumeTrue("At least one section is needed for this test", sections.iterator().hasNext());
+
+            existingSection = sections.iterator().next();
+        } catch (ZendeskException e) {
+            assumeNoException("Need to be able to fetch section to run this test", e);
+        }
+
+        return existingSection;
     }
 
     private List<Article> getList(Iterable<Article> iterable)
