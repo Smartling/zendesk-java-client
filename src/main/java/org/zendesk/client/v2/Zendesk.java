@@ -315,7 +315,7 @@ public class Zendesk implements Closeable {
         if (searchTerm == null) {
             throw new IllegalArgumentException(String.format("Param %s cannot be null", "searchTerm"));
         }
-        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&query={query}")
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&locale={locale}&query={query}")
                 .set("page", page)
                 .set("per_page", perPage)
                 .set("locale", locale)
@@ -324,7 +324,7 @@ public class Zendesk implements Closeable {
     }
 
     public Iterable<Article> getArticlesByQueryAndSection(int page, int perPage, final String locale, String searchTerm, long sectionId) {
-        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&query={query}&section={section}")
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&locale={locale}&query={query}&section={section}")
                 .set("page", page)
                 .set("per_page", perPage)
                 .set("locale", locale)
@@ -334,7 +334,7 @@ public class Zendesk implements Closeable {
     }
 
     public Iterable<Article> getArticlesByQueryAndCategory(int page, int perPage, final String locale, String searchTerm, long categoryId) {
-        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&query={query}&category={category}")
+        return new PagedIterable<Article>(tmpl("/help_center/articles/search.json?page={page}&per_page={per_page}&locale={locale}&query={query}&category={category}")
                 .set("page", page)
                 .set("per_page", perPage)
                 .set("query", searchTerm)
