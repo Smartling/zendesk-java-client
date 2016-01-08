@@ -19,8 +19,7 @@
 
   <groupId>com.smartling.connector</groupId>
   <artifactId>zendesk-java-client</artifactId>
-  <version>0.4.3-SNAPSHOT</version>
-
+  <version>0.4.3</version>
   <name>zendesk-java-client</name>
   <description>Java client for the Zendesk API</description>
   <url>https://github.com/Smartling/zendesk-java-client</url>
