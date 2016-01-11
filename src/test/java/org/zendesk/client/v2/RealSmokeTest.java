@@ -697,6 +697,19 @@ public class RealSmokeTest {
     }
 
     @Test
+    public void shouldReturnSectionsByCategory() throws Exception {
+        Iterable<Section> sectionsByCategory = instance.getSectionsByCategory(categoryId, 1, 10, "updated_at", "desc");
+
+        List<Section> result = getList(sectionsByCategory);
+        assertEquals(Integer.parseInt(config.getProperty("expected.sections.by.category")), result.size());
+    }
+
+    @Test(expected = ZendeskResponseException.class)
+    public void shouldThrowExceptionWhenSearchByNonExistingCategoryId() throws Exception {
+        instance.getSectionsByCategory(0, 1, 10, "updated_at", "desc");
+    }
+
+    @Test
     public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentSectionId() throws Exception {
         Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndSection(1, 10, "en-us", null, 0);
 
@@ -778,10 +791,10 @@ public class RealSmokeTest {
         return existingSection;
     }
 
-    private List<Article> getList(Iterable<Article> iterable)
+    private <T> List<T> getList(Iterable<T> iterable)
     {
-        List<Article> result = new ArrayList<>();
-        for (Article article : iterable) {
+        List<T> result = new ArrayList<>();
+        for (T article : iterable) {
             result.add(article);
         }
         return result;
