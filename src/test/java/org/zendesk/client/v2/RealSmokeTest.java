@@ -698,6 +698,8 @@ public class RealSmokeTest {
 
     @Test
     public void shouldReturnSectionsByCategory() throws Exception {
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
         Iterable<Section> sectionsByCategory = instance.getSectionsByCategory(categoryId, 1, 10, "updated_at", "desc");
 
         List<Section> result = getList(sectionsByCategory);
