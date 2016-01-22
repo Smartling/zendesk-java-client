@@ -22,6 +22,7 @@ import org.zendesk.client.v2.model.User;
 import org.zendesk.client.v2.model.events.Event;
 import org.zendesk.client.v2.model.hc.Article;
 import org.zendesk.client.v2.model.hc.Category;
+import org.zendesk.client.v2.model.hc.DynamicContent;
 import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.targets.Target;
 
@@ -48,6 +49,7 @@ import static org.junit.Assume.assumeNoException;
 import static org.junit.Assume.assumeNotNull;
 import static org.junit.Assume.assumeThat;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author stephenc
@@ -746,6 +748,13 @@ public class RealSmokeTest {
         Section loadedCategory = instance.getSection("en-us",existingSection.getId().intValue());
 
         assertEquals(loadedCategory.getId(), existingSection.getId());
+    }
+
+    @Test
+    public void shouldReturnNotEmptyDynamicContentCollection() throws Exception
+    {
+        Iterable<DynamicContent> dynamicContent = instance.getDynamicContent(1, 10, "updated_at", "asc");
+        assertFalse(getList(dynamicContent).isEmpty());
     }
 
     private Article getRandomArticle()
