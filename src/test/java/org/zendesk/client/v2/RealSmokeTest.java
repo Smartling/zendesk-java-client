@@ -24,6 +24,7 @@ import org.zendesk.client.v2.model.hc.Article;
 import org.zendesk.client.v2.model.hc.Category;
 import org.zendesk.client.v2.model.hc.DynamicContent;
 import org.zendesk.client.v2.model.hc.Section;
+import org.zendesk.client.v2.model.hc.Variant;
 import org.zendesk.client.v2.model.targets.Target;
 
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class RealSmokeTest {
 
     private Long sectionId;
     private Long categoryId;
+    private Long dynamicContentId;
     private String queryString;
 
     private Zendesk instance;
@@ -92,6 +94,7 @@ public class RealSmokeTest {
     public void init() throws Exception {
         sectionId = parseLongOrNull(config.getProperty("sectionId"));
         categoryId = parseLongOrNull(config.getProperty("categoryId"));
+        dynamicContentId = parseLongOrNull(config.getProperty("dynamicContentId"));
         queryString = config.getProperty("queryString");
 
         createClientWithTokenOrPassword();
@@ -748,6 +751,13 @@ public class RealSmokeTest {
         Section loadedCategory = instance.getSection("en-us",existingSection.getId().intValue());
 
         assertEquals(loadedCategory.getId(), existingSection.getId());
+    }
+
+    @Test
+    public void shouldReturnNotEmptyVariantsCollection() throws Exception
+    {
+        Iterable<Variant> variants = instance.getVariants(dynamicContentId);
+        assertFalse(getList(variants).isEmpty());
     }
 
     @Test

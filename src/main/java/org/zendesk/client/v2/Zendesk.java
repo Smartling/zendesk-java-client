@@ -50,6 +50,7 @@ import org.zendesk.client.v2.model.hc.Category;
 import org.zendesk.client.v2.model.hc.DynamicContent;
 import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.hc.Translation;
+import org.zendesk.client.v2.model.hc.Variant;
 import org.zendesk.client.v2.model.targets.BasecampTarget;
 import org.zendesk.client.v2.model.targets.CampfireTarget;
 import org.zendesk.client.v2.model.targets.EmailTarget;
@@ -1364,6 +1365,15 @@ public class Zendesk implements Closeable {
                                 .set("sort_order", sortOrder)
                 ),
                 handleList(Article.class, "articles")));
+    }
+
+    public Iterable<Variant> getVariants(long dynamicContentId) {
+        return complete(submit(
+                req("GET", tmpl("/dynamic_content/items/{dynamicContentId}/variants.json")
+                        .set("dynamicContentId", dynamicContentId)
+                ),
+                handleList(Variant.class, "variants")
+        ));
     }
 
     public Iterable<DynamicContent> getDynamicContent(int page, int perPage, String sortBy, String sortOrder) {
