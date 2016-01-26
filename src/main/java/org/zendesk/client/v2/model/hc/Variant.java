@@ -10,7 +10,10 @@ public class Variant
 
     private Long id;
 
-    private String name;
+    private String content;
+
+    @JsonProperty("locale_id")
+    private Long localeId;
 
     private boolean outdated;
 
@@ -45,14 +48,24 @@ public class Variant
         this.id = id;
     }
 
-    public String getName()
+    public String getContent()
     {
-        return name;
+        return content;
     }
 
-    public void setName(String name)
+    public void setContent(String content)
     {
-        this.name = name;
+        this.content = content;
+    }
+
+    public Long getLocaleId()
+    {
+        return localeId;
+    }
+
+    public void setLocaleId(Long localeId)
+    {
+        this.localeId = localeId;
     }
 
     public boolean isOutdated()
