@@ -22,7 +22,7 @@ import org.zendesk.client.v2.model.User;
 import org.zendesk.client.v2.model.events.Event;
 import org.zendesk.client.v2.model.hc.Article;
 import org.zendesk.client.v2.model.hc.Category;
-import org.zendesk.client.v2.model.hc.DynamicContent;
+import org.zendesk.client.v2.model.hc.DynamicContentItem;
 import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.hc.Variant;
 import org.zendesk.client.v2.model.targets.Target;
@@ -62,7 +62,7 @@ public class RealSmokeTest {
 
     private Long sectionId;
     private Long categoryId;
-    private Long dynamicContentId;
+    private Long dynamicContentItemId;
     private String queryString;
 
     private Zendesk instance;
@@ -94,7 +94,7 @@ public class RealSmokeTest {
     public void init() throws Exception {
         sectionId = parseLongOrNull(config.getProperty("sectionId"));
         categoryId = parseLongOrNull(config.getProperty("categoryId"));
-        dynamicContentId = parseLongOrNull(config.getProperty("dynamicContentId"));
+        dynamicContentItemId = parseLongOrNull(config.getProperty("dynamicContentItemId"));
         queryString = config.getProperty("queryString");
 
         createClientWithTokenOrPassword();
@@ -756,14 +756,16 @@ public class RealSmokeTest {
     @Test
     public void shouldReturnNotEmptyVariantsCollection() throws Exception
     {
-        Iterable<Variant> variants = instance.getVariants(dynamicContentId);
+        assumeNotNull("DynamicContentItemId ID is required to run this test", dynamicContentItemId);
+
+        Iterable<Variant> variants = instance.getVariants(dynamicContentItemId);
         assertFalse(getList(variants).isEmpty());
     }
 
     @Test
     public void shouldReturnNotEmptyDynamicContentCollection() throws Exception
     {
-        Iterable<DynamicContent> dynamicContent = instance.getDynamicContent(1, 10, "updated_at", "asc");
+        Iterable<DynamicContentItem> dynamicContent = instance.getDynamicContentItems(1, 10, "updated_at", "asc");
         assertFalse(getList(dynamicContent).isEmpty());
     }
 

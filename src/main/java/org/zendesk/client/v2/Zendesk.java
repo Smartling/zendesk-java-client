@@ -47,7 +47,7 @@ import org.zendesk.client.v2.model.UserField;
 import org.zendesk.client.v2.model.hc.Article;
 import org.zendesk.client.v2.model.hc.ArticleAttachments;
 import org.zendesk.client.v2.model.hc.Category;
-import org.zendesk.client.v2.model.hc.DynamicContent;
+import org.zendesk.client.v2.model.hc.DynamicContentItem;
 import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.hc.Translation;
 import org.zendesk.client.v2.model.hc.Variant;
@@ -1376,7 +1376,7 @@ public class Zendesk implements Closeable {
         ));
     }
 
-    public Iterable<DynamicContent> getDynamicContent(int page, int perPage, String sortBy, String sortOrder) {
+    public Iterable<DynamicContentItem> getDynamicContentItems(int page, int perPage, String sortBy, String sortOrder) {
         return complete(submit(
                 req("GET", tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                         .set("page", page)
@@ -1384,7 +1384,7 @@ public class Zendesk implements Closeable {
                         .set("sort_by", sortBy)
                         .set("sort_order", sortOrder)
                 ),
-                handleList(DynamicContent.class, "items")
+                handleList(DynamicContentItem.class, "items")
         ));
     }
 
