@@ -63,6 +63,7 @@ public class RealSmokeTest {
     private Long sectionId;
     private Long categoryId;
     private Long dynamicContentItemId;
+    private Long variantId;
     private String queryString;
 
     private Zendesk instance;
@@ -95,6 +96,7 @@ public class RealSmokeTest {
         sectionId = parseLongOrNull(config.getProperty("sectionId"));
         categoryId = parseLongOrNull(config.getProperty("categoryId"));
         dynamicContentItemId = parseLongOrNull(config.getProperty("dynamicContentItemId"));
+        variantId = parseLongOrNull(config.getProperty("variantId"));
         queryString = config.getProperty("queryString");
 
         createClientWithTokenOrPassword();
@@ -763,6 +765,52 @@ public class RealSmokeTest {
     }
 
     @Test
+    public void shouldReturnVariantById() throws Exception {
+        assumeNotNull("DynamicContentItemId is required to run this test", dynamicContentItemId);
+        assumeNotNull("variantId is required to run this test", variantId);
+
+        Variant variantById = instance.getVariantById(dynamicContentItemId, variantId);
+
+        assertEquals(variantId, variantById.getId());
+    }
+
+    @Test
+    public void shouldCreateVariant() throws Exception {
+        assumeNotNull("DynamicContentItemId ID is required to run this test", dynamicContentItemId);
+
+        Iterable<Variant> variants = instance.getVariants(dynamicContentItemId);
+        int initialSize = getList(variants).size();
+
+        instance.createVariant(dynamicContentItemId, getVariant(null, 2L, "Spanish variant"));
+
+        Iterable<Variant> resultVariants = instance.getVariants(dynamicContentItemId);
+        assertEquals(initialSize + 1, getList(resultVariants).size());
+    }
+
+    @Test
+    public void createdVariantShouldContainAppropriateFields() throws Exception{
+        assumeNotNull("DynamicContentItemId ID is required to run this test", dynamicContentItemId);
+
+        Variant resultVariant = instance.createVariant(dynamicContentItemId, getVariant(null, 1365L, "French variant"));
+
+        assertTrue(resultVariant.getId()!=null);
+        assertEquals(new Long(1365), resultVariant.getLocaleId());
+        assertEquals("French variant", resultVariant.getContent());
+    }
+
+    @Test
+    public void shouldUpdateVariant() throws Exception{
+        assumeNotNull("dynamicContentItemId is required to run this test", dynamicContentItemId);
+        assumeNotNull("variantId is required to run this test", variantId);
+
+        Variant resultVariant = instance.updateVariant(dynamicContentItemId, getVariant(variantId, 1365L, "French variant updated"));
+
+        Variant variantById = instance.getVariantById(dynamicContentItemId, resultVariant.getId());
+
+        assertEquals("French variant updated", variantById.getContent());
+    }
+
+    @Test
     public void shouldReturnNotEmptyDynamicContentCollection() throws Exception
     {
         Iterable<DynamicContentItem> dynamicContent = instance.getDynamicContentItems(1, 10, "updated_at", "asc");
@@ -812,6 +860,17 @@ public class RealSmokeTest {
         }
 
         return existingSection;
+    }
+
+    private Variant getVariant(Long variantId, Long localeId, String content)
+    {
+        Variant variant = new Variant();
+        variant.setId(variantId);
+        variant.setContent(content);
+        variant.setActive(true);
+        variant.setDefaultVariant(false);
+        variant.setLocaleId(localeId);
+        return variant;
     }
 
     private <T> List<T> getList(Iterable<T> iterable)

@@ -1376,6 +1376,28 @@ public class Zendesk implements Closeable {
         ));
     }
 
+    public Variant getVariantById(long dynamicContentId, long variantId){
+        return complete(submit(
+                req("GET", tmpl("/dynamic_content/items/{dynamicContentId}/variants/{variantId}.json")
+                        .set("dynamicContentId", dynamicContentId)
+                        .set("variantId", variantId)
+                ),
+                handle(Variant.class, "variant")
+        ));
+    }
+
+    public Variant createVariant(long dynamicContentId, Variant variant) {
+        return complete(submit(req("POST", tmpl("/dynamic_content/items/{id}/variants.json").set("id", dynamicContentId),
+                JSON, json(Collections.singletonMap("variant", variant))), handle(Variant.class, "variant")));
+    }
+
+    public Variant updateVariant(long dynamicContentId, Variant variant) {
+        return complete(submit(req("PUT", tmpl("/dynamic_content/items/{id}/variants/{variantId}.json")
+                        .set("id", dynamicContentId)
+                        .set("variantId", variant.getId()),
+                JSON, json(Collections.singletonMap("variant", variant))), handle(Variant.class, "variant")));
+    }
+
     public Iterable<DynamicContentItem> getDynamicContentItems(int page, int perPage, String sortBy, String sortOrder) {
         return complete(submit(
                 req("GET", tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
