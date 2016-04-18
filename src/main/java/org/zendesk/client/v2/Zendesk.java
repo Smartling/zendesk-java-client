@@ -1,22 +1,19 @@
 package org.zendesk.client.v2;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.ListenableFuture;
+import com.ning.http.client.Realm;
+import com.ning.http.client.Request;
+import com.ning.http.client.RequestBuilder;
+import com.ning.http.client.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zendesk.client.v2.model.Attachment;
@@ -59,20 +56,22 @@ import org.zendesk.client.v2.model.targets.Target;
 import org.zendesk.client.v2.model.targets.TwitterTarget;
 import org.zendesk.client.v2.model.targets.UrlTarget;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.ListenableFuture;
-import com.ning.http.client.Realm;
-import com.ning.http.client.Request;
-import com.ning.http.client.RequestBuilder;
-import com.ning.http.client.Response;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 /**
  * @author stephenc
@@ -346,8 +345,8 @@ public class Zendesk implements Closeable {
     }
 
     public List<ArticleAttachments> getAttachmentsFromArticle(Long articleID) {
-        return complete(submit(req("GET", tmpl("/help_center/articles/{?query}/attachments.json").set("query", articleID)),
-                handleList(ArticleAttachments.class, "articles")));
+        return complete(submit(req("GET", tmpl("/help_center/articles/{articleId}/attachments.json").set("articleId", articleID)),
+                        handleSimpleList(ArticleAttachments.class, "article_attachments")));
     }
 
     public List<Ticket> getTickets(long id, long... ids) {
@@ -1741,6 +1740,34 @@ public class Zendesk implements Closeable {
         };
     }
 
+    private class ListAsyncCompletionHandler<T> extends ZendeskAsyncCompletionHandler<List<T>>
+    {
+        private String name;
+        private Class<T> clazz;
+
+        public ListAsyncCompletionHandler(final Class<T> clazz, final String name)
+        {
+            this.name = name;
+            this.clazz = clazz;
+        }
+
+        @Override
+        public List<T> onCompleted(Response response) throws Exception
+        {
+            logResponse(response);
+            if (isStatus2xx(response))
+            {
+                JsonNode responseNode = mapper.readTree(response.getResponseBodyAsBytes());
+                List<T> values = new ArrayList<T>();
+                for (JsonNode node : responseNode.get(name))
+                {
+                    values.add(mapper.convertValue(node, clazz));
+                }
+                return values;
+            }
+            throw new ZendeskResponseException(response);
+        }
+    }
     private static final String NEXT_PAGE = "next_page";
     private static final String END_TIME = "end_time";
     private static final String COUNT = "count";
@@ -1794,6 +1821,10 @@ public class Zendesk implements Closeable {
 
     protected <T> PagedAsyncCompletionHandler<List<T>> handleList(final Class<T> clazz, final String name) {
         return new PagedAsyncListCompletionHandler<T>(clazz, name);
+    }
+
+    protected <T> ListAsyncCompletionHandler<T> handleSimpleList(final Class<T> clazz, final String name) {
+        return new ListAsyncCompletionHandler<T>(clazz, name);
     }
 
     private static final long FIVE_MINUTES = TimeUnit.MINUTES.toMillis(5);
