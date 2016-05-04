@@ -77,9 +77,8 @@ import java.util.regex.Pattern;
  * @author stephenc
  * @since 04/04/2013 13:08
  */
-public class Zendesk implements Closeable {
+public class Zendesk implements AutoCloseable {
     private static final String JSON = "application/json; charset=UTF-8";
-    private final boolean closeClient;
     private final AsyncHttpClient client;
     private final Realm realm;
     private final String url;
@@ -122,7 +121,6 @@ public class Zendesk implements Closeable {
 
     private Zendesk(AsyncHttpClient client, String url, String username, String password) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
-        this.closeClient = client == null;
         this.oauthToken = null;
         this.client = client == null ? new AsyncHttpClient() : client;
         this.url = url.endsWith("/") ? url + "api/v2" : url + "/api/v2";
@@ -145,7 +143,6 @@ public class Zendesk implements Closeable {
 
     private Zendesk(AsyncHttpClient client, String url, String oauthToken) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
-        this.closeClient = client == null;
         this.realm = null;
         this.client = client == null ? new AsyncHttpClient() : client;
         this.url = url.endsWith("/") ? url + "api/v2" : url + "/api/v2";
@@ -168,7 +165,7 @@ public class Zendesk implements Closeable {
     }
 
     public void close() {
-        if (closeClient && !client.isClosed()) {
+        if (client != null && !client.isClosed()) {
             client.close();
         }
         closed = true;
