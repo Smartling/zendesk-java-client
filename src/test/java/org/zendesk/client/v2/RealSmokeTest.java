@@ -719,6 +719,16 @@ public class RealSmokeTest {
     }
 
     @Test
+    public void shouldReturnSectionsByLocaleAndCategory() throws Exception {
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
+        Iterable<Section> sectionsByCategory = instance.getSectionsByCategory(categoryId, "en-us", 1, 10, "updated_at", "desc");
+
+        List<Section> result = getList(sectionsByCategory);
+        assertEquals(Integer.parseInt(config.getProperty("expected.sections.by.category")), result.size());
+    }
+
+    @Test
     public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentSectionId() throws Exception {
         Iterable<Article> articlesByQueryAndCategory = instance.getArticlesByQueryAndSection(1, 10, "en-us", null, 0);
 

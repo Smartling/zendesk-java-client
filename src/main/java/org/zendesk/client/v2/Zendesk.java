@@ -1522,6 +1522,20 @@ public class Zendesk implements AutoCloseable {
                 handleList(Section.class, "sections")));
     }
 
+    public Iterable<Section> getSectionsByCategory(long categoryId, String locale, int page, int perPage, String sortBy, String sortOrder)
+    {
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/categories/{categoryId}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("categoryId", categoryId)
+                                .set("page", page)
+                                .set("per_page", perPage)
+                                .set("sort_by", sortBy)
+                                .set("sort_order", sortOrder)
+                ),
+                handleList(Section.class, "sections")));
+    }
 
     public Section getSection(int id) {
         return complete(submit(req("GET", tmpl("/help_center/sections/{id}.json").set("id", id)),
