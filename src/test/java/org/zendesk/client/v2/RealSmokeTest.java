@@ -21,6 +21,7 @@ import org.zendesk.client.v2.model.TicketForm;
 import org.zendesk.client.v2.model.User;
 import org.zendesk.client.v2.model.events.Event;
 import org.zendesk.client.v2.model.hc.Article;
+import org.zendesk.client.v2.model.hc.ArticleAttachments;
 import org.zendesk.client.v2.model.hc.Category;
 import org.zendesk.client.v2.model.hc.DynamicContentItem;
 import org.zendesk.client.v2.model.hc.Section;
@@ -825,6 +826,16 @@ public class RealSmokeTest {
     {
         Iterable<DynamicContentItem> dynamicContent = instance.getDynamicContentItems(1, 10, "updated_at", "asc");
         assertFalse(getList(dynamicContent).isEmpty());
+    }
+
+    @Test
+    public void shouldReturnArticleAttachment() throws Exception
+    {
+        Article existingArticle = getRandomArticle();
+
+        List<ArticleAttachments> attachments = instance.getAttachmentsFromArticle("en-us", existingArticle.getId().intValue());
+
+        assertNotNull(attachments);
     }
 
     private Article getRandomArticle()

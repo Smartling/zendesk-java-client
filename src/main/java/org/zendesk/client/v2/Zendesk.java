@@ -346,6 +346,13 @@ public class Zendesk implements AutoCloseable {
                         handleSimpleList(ArticleAttachments.class, "article_attachments")));
     }
 
+    public List<ArticleAttachments> getAttachmentsFromArticle(String locale, long articleId) {
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/articles/{articleId}/attachments.json")
+                .set("locale", locale)
+                .set("articleId", articleId)),
+                handleSimpleList(ArticleAttachments.class, "article_attachments")));
+    }
+
     public List<Ticket> getTickets(long id, long... ids) {
         return complete(submit(req("GET", tmpl("/tickets/show_many.json{?ids}").set("ids", idArray(id, ids))),
                 handleList(Ticket.class, "tickets")));
