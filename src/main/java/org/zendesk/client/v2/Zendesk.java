@@ -56,7 +56,6 @@ import org.zendesk.client.v2.model.targets.Target;
 import org.zendesk.client.v2.model.targets.TwitterTarget;
 import org.zendesk.client.v2.model.targets.UrlTarget;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -299,11 +298,19 @@ public class Zendesk implements AutoCloseable {
                 handleList(Ticket.class, "results"));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Iterable<Article> getArticleFromSearch(String searchTerm) {
         return new PagedIterable<Article>(tmpl("/help_center/articles/search.json{?query}").set("query", searchTerm),
                 handleList(Article.class, "results"));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Iterable<Article> getArticleFromSearch(String searchTerm, Long sectionId) {
         return new PagedIterable<Article>(tmpl("/help_center/articles/search.json{?section,query}")
                 .set("query", searchTerm).set("section", sectionId), handleList(Article.class, "results"));
@@ -341,6 +348,10 @@ public class Zendesk implements AutoCloseable {
                 , handleList(Article.class, "results"));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public List<ArticleAttachments> getAttachmentsFromArticle(Long articleID) {
         return complete(submit(req("GET", tmpl("/help_center/articles/{articleId}/attachments.json").set("articleId", articleID)),
                         handleSimpleList(ArticleAttachments.class, "article_attachments")));
@@ -1348,14 +1359,15 @@ public class Zendesk implements AutoCloseable {
 
     /**
      * Get all articles from help center.
+     * @deprecated Prefer version with explicit locale
      *
      * @return List of Articles.
      */
+    @Deprecated
     public Iterable<Article> getArticles() {
         return new PagedIterable<Article>(cnst("/help_center/articles.json"),
                 handleList(Article.class, "articles"));
     }
-
 
     public Iterable<Article> getArticles(int page, int perPage, String locale, String sortBy, String sortOrder) {
         return complete(submit(
@@ -1413,11 +1425,19 @@ public class Zendesk implements AutoCloseable {
         ));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public List<Article> getArticlesFromPage(int page) {
         return complete(submit(req("GET", tmpl("/help_center/articles.json?page={page}").set("page", page)),
                 handleList(Article.class, "articles")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Article getArticle(int id) {
         return complete(submit(req("GET", tmpl("/help_center/articles/{id}.json").set("id", id)),
                 handle(Article.class, "article")));
@@ -1429,12 +1449,20 @@ public class Zendesk implements AutoCloseable {
                 handle(Article.class, "article")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Article createArticle(Article article) {
         checkHasSectionId(article);
         return complete(submit(req("POST", tmpl("/help_center/sections/{id}/articles.json").set("id", article.getSectionId()),
                 JSON, json(Collections.singletonMap("article", article))), handle(Article.class, "article")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Article updateArticle(Article article) {
         checkHasId(article);
         return complete(submit(req("PUT", tmpl("/help_center/articles/{id}.json").set("id", article.getId()),
@@ -1447,6 +1475,10 @@ public class Zendesk implements AutoCloseable {
                 handleStatus()));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public List<Category> getCategories() {
         return complete(submit(req("GET", cnst("/help_center/categories.json")),
                 handleList(Category.class, "categories")));
@@ -1465,6 +1497,10 @@ public class Zendesk implements AutoCloseable {
                 handleList(Category.class, "categories")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Category getCategory(int id) {
         return complete(submit(req("GET", tmpl("/help_center/categories/{id}.json").set("id", id)),
                 handle(Category.class, "category")));
@@ -1476,11 +1512,19 @@ public class Zendesk implements AutoCloseable {
                 handle(Category.class, "category")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Category createCategory(Category category) {
         return complete(submit(req("POST", cnst("/help_center/categories.json"),
                 JSON, json(Collections.singletonMap("category", category))), handle(Category.class, "category")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Category updateCategory(Category category) {
         checkHasId(category);
         return complete(submit(req("PUT", tmpl("/help_center/categories/{id}.json").set("id", category.getId()),
@@ -1493,10 +1537,18 @@ public class Zendesk implements AutoCloseable {
                 handleStatus()));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public List<Section> getSections() {
         return complete(submit(req("GET", cnst("/help_center/sections.json")), handleList(Section.class, "sections")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public List<Section> getSections(Category category) {
         checkHasId(category);
         return complete(submit(req("GET", tmpl("/help_center/categories/{id}/sections.json").set("id", category.getId())),
@@ -1516,6 +1568,10 @@ public class Zendesk implements AutoCloseable {
                 handleList(Section.class, "sections")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Iterable<Section> getSectionsByCategory(long categoryId, int page, int perPage, String sortBy, String sortOrder) {
         return complete(submit(
                 req("GET",
@@ -1544,6 +1600,10 @@ public class Zendesk implements AutoCloseable {
                 handleList(Section.class, "sections")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Section getSection(int id) {
         return complete(submit(req("GET", tmpl("/help_center/sections/{id}.json").set("id", id)),
                 handle(Section.class, "section")));
@@ -1555,11 +1615,19 @@ public class Zendesk implements AutoCloseable {
                 handle(Section.class, "section")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Section createSection(Section section) {
         return complete(submit(req("POST", cnst("/help_center/sections.json"), JSON,
                 json(Collections.singletonMap("section", section))), handle(Section.class, "section")));
     }
 
+    /**
+     * @deprecated Prefer version with explicit locale
+     */
+    @Deprecated
     public Section updateSection(Section section) {
         checkHasId(section);
         return complete(submit(req("PUT", tmpl("/help_center/sections/{id}.json").set("id", section.getId()),
