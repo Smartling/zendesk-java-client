@@ -1274,7 +1274,7 @@ public class Zendesk implements AutoCloseable {
     }
 
     public void deleteGroupMembership(long id) {
-        complete(submit(req("DELETE", tmpl("/groups_memberships/{id}.json").set("id", id)), handleStatus()));
+        complete(submit(req("DELETE", tmpl("/group_memberships/{id}.json").set("id", id)), handleStatus()));
     }
 
     public void deleteGroupMembership(long user_id, GroupMembership groupMembership) {
@@ -1283,13 +1283,13 @@ public class Zendesk implements AutoCloseable {
     }
 
     public void deleteGroupMembership(long user_id, long group_membership_id) {
-        complete(submit(req("DELETE", tmpl("/users/{uid}/groups_memberships/{gmid}.json").set("uid", user_id)
+        complete(submit(req("DELETE", tmpl("/users/{uid}/group_memberships/{gmid}.json").set("uid", user_id)
                 .set("gmid", group_membership_id)), handleStatus()));
     }
 
     public List<GroupMembership> setGroupMembershipAsDefault(long user_id, GroupMembership groupMembership) {
         checkHasId(groupMembership);
-        return complete(submit(req("POST", tmpl("/users/{uid}/group_memberships/{gmid}/make_default.json")
+        return complete(submit(req("PUT", tmpl("/users/{uid}/group_memberships/{gmid}/make_default.json")
                         .set("uid", user_id).set("gmid", groupMembership.getId()), JSON, json(
                         Collections.singletonMap("group_memberships", groupMembership))),
                 handleList(GroupMembership.class, "results")));
@@ -1518,6 +1518,14 @@ public class Zendesk implements AutoCloseable {
             handleList(Translation.class, "translations"));
     }
 
+    public Translation getArticleTranslation(Long articleId, String locale) {
+        return complete(submit(req("GET", tmpl("/help_center/articles/{articleId}/translations/{locale}.json")
+                .set("articleId", articleId)
+                .set("locale", locale)),
+                handle(Translation.class, "translation")
+        ));
+    }
+
     /**
      * @deprecated Prefer version with explicit locale
      */
@@ -1536,6 +1544,15 @@ public class Zendesk implements AutoCloseable {
         checkHasId(article);
         return complete(submit(req("PUT", tmpl("/help_center/articles/{id}.json").set("id", article.getId()),
                 JSON, json(Collections.singletonMap("article", article))), handle(Article.class, "article")));
+    }
+
+    public Translation createArticleTranslation(Long articleId, String locale, Translation translation) {
+        return complete(submit(req("POST", tmpl("/help_center/articles/{articleId}/translations/{locale}.json")
+                    .set("articleId", articleId)
+                    .set("locale", locale
+                ),
+                JSON, json(Collections.singletonMap("translation", translation))),
+                this.handle(Translation.class, "translation")));
     }
 
     public Translation updateArticleTranslation(Long articleId, String locale, Translation translation) {
@@ -1612,6 +1629,14 @@ public class Zendesk implements AutoCloseable {
                 handleList(Translation.class, "translations"));
     }
 
+    public Translation getCategoryTranslation(Long categoryId, String locale) {
+        return complete(submit(req("GET", tmpl("/help_center/categories/{categoryId}/translations/{locale}.json")
+                        .set("categoryId", categoryId)
+                        .set("locale", locale)),
+                handle(Translation.class, "translation")
+        ));
+    }
+
     /**
      * @deprecated Prefer version with explicit locale
      */
@@ -1629,6 +1654,15 @@ public class Zendesk implements AutoCloseable {
         checkHasId(category);
         return complete(submit(req("PUT", tmpl("/help_center/categories/{id}.json").set("id", category.getId()),
                 JSON, json(Collections.singletonMap("category", category))), handle(Category.class, "category")));
+    }
+
+    public Translation createCategoryTranslation(Long categoryId, String locale, Translation translation) {
+        return complete(submit(req("POST", tmpl("/help_center/categories/{categoryId}/translations/{locale}.json")
+                        .set("categoryId", categoryId)
+                        .set("locale", locale
+                        ),
+                JSON, json(Collections.singletonMap("translation", translation))),
+                this.handle(Translation.class, "translation")));
     }
 
     public Translation updateCategoryTranslation(Long categoryId, String locale, Translation translation) {
@@ -1729,6 +1763,14 @@ public class Zendesk implements AutoCloseable {
                 handleList(Translation.class, "translations"));
     }
 
+    public Translation getSectionTranslation(Long sectionId, String locale) {
+        return complete(submit(req("GET", tmpl("/help_center/sections/{sectionId}/translations/{locale}.json")
+                        .set("sectionId", sectionId)
+                        .set("locale", locale)),
+                handle(Translation.class, "translation")
+        ));
+    }
+
     /**
      * @deprecated Prefer version with explicit locale
      */
@@ -1746,6 +1788,15 @@ public class Zendesk implements AutoCloseable {
         checkHasId(section);
         return complete(submit(req("PUT", tmpl("/help_center/sections/{id}.json").set("id", section.getId()),
                 JSON, json(Collections.singletonMap("section", section))), handle(Section.class, "section")));
+    }
+
+    public Translation createSectionTranslation(Long sectionId, String locale, Translation translation) {
+        return complete(submit(req("POST", tmpl("/help_center/sections/{sectionId}/translations/{locale}.json")
+                        .set("sectionId", sectionId)
+                        .set("locale", locale
+                        ),
+                JSON, json(Collections.singletonMap("translation", translation))),
+                this.handle(Translation.class, "translation")));
     }
 
     public Translation updateSectionTranslation(Long sectionId, String locale, Translation translation) {
