@@ -991,47 +991,32 @@ public class RealSmokeTest {
 
     private Article getRandomArticle()
     {
-        Article existingArticle = null;
         try {
-            Iterable<Article> articles = instance.getArticles();
-            assumeTrue("At least one article is needed for this test", articles.iterator().hasNext());
-
-            existingArticle = articles.iterator().next();
+            return getFirstIfExist(instance.getArticles());
         } catch (ZendeskException e) {
             assumeNoException("Need to be able to fetch articles to run this test", e);
+            throw new IllegalStateException("Not possible here");
         }
-
-        return existingArticle;
     }
 
     private Category getRandomCategory()
     {
-        Category existingCategory = null;
         try {
-            Iterable<Category> categories = instance.getCategories();
-            assumeTrue("At least one category is needed for this test", categories.iterator().hasNext());
-
-            existingCategory = categories.iterator().next();
+            return getFirstIfExist(instance.getCategories());
         } catch (ZendeskException e) {
             assumeNoException("Need to be able to fetch category to run this test", e);
+            throw new IllegalStateException("Not possible here");
         }
-
-        return existingCategory;
     }
 
     private Section getRandomSection()
     {
-        Section existingSection = null;
         try {
-            Iterable<Section> sections = instance.getSections();
-            assumeTrue("At least one section is needed for this test", sections.iterator().hasNext());
-
-            existingSection = sections.iterator().next();
+            return getFirstIfExist(instance.getSections());
         } catch (ZendeskException e) {
             assumeNoException("Need to be able to fetch section to run this test", e);
+            throw new IllegalStateException("Not possible here");
         }
-
-        return existingSection;
     }
 
     private Variant getVariant(Long variantId, Long localeId, String content)
