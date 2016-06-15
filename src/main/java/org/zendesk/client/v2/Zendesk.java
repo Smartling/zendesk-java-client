@@ -1814,36 +1814,6 @@ public class Zendesk implements AutoCloseable {
         return complete(submit(req("GET", cnst("/locales.json")), handleList(Locale.class, "locales")));
     }
 
-    /**
-     * Translations API
-     * See https://developer.zendesk.com/rest_api/docs/help_center/translations.html
-     */
-    public Translation getTranslation(Translation.SourceType sourceType, Long sourceId, String locale)
-    {
-        return complete(submit(req("GET", tmpl("/help_center/{source_path}/{source_id}/translations/{locale}.json")
-                    .set("source_path", sourceType.getUrlPath()).set("source_id", sourceId).set("locale", locale)),
-                handle(Translation.class, "translation")));
-    }
-
-    public Translation createTranslation(Translation translation)
-    {
-        checkHasSourceTypeAndIdAndLocale(translation);
-        return complete(submit(req("POST", tmpl("/help_center/{source_path}/{source_id}/translations.json")
-                    .set("source_path", Translation.SourceType.getBySourceName(translation.getSourceType()).getUrlPath())
-                    .set("source_id", translation.getSourceId()), JSON,
-                json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
-    }
-
-    public Translation updateTranslation(Translation translation)
-    {
-        checkHasSourceTypeAndIdAndLocale(translation);
-        return complete(submit(req("PUT", tmpl("/help_center/{source_path}/{source_id}/translations/{locale}.json")
-                    .set("source_path", Translation.SourceType.getBySourceName(translation.getSourceType()).getUrlPath())
-                    .set("source_id", translation.getSourceId())
-                    .set("locale", translation.getLocale()), JSON,
-                json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
-    }
-
     public void deleteTranslation(Translation translation)
     {
         checkHasId(translation);
@@ -2360,18 +2330,6 @@ public class Zendesk implements AutoCloseable {
     private static void checkHasId(Translation translation) {
         if (translation.getId() == null) {
             throw new IllegalArgumentException("Translation requires id");
-        }
-    }
-
-    private static void checkHasSourceTypeAndIdAndLocale(Translation translation) {
-        if (translation.getSourceType() == null || 0 == translation.getSourceType().length()) {
-            throw new IllegalArgumentException("Translation requires sourceType");
-        }
-        if (translation.getSourceId() == null) {
-            throw new IllegalArgumentException("Translation requires sourceId");
-        }
-        if (translation.getLocale() == null || 0 == translation.getLocale().length()) {
-            throw new IllegalArgumentException("Translation requires locale");
         }
     }
 

@@ -58,12 +58,11 @@ public class ZendeskTranslationTest
     {
         long id = 18;
         String locale = "zo";
-        String url = DEFAULT_URL + "/api/v2/help_center/" + Translation.SourceType.ARTICLE.getUrlPath() + "/" + id + "/translations/" + locale + ".json";
-        Translation responseTranslation = getTranslation(locale, Translation.SourceType.ARTICLE, id);
-        Response response = toContentResponse(200, responseTranslation);
-        setupHttpCall("GET", url, null, response);
+        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations/" + locale + ".json";
+        Translation responseTranslation = getTranslation(locale, id);
+        setupHttpCall("GET", url, null, toContentResponse(200, responseTranslation));
 
-        Translation result = instance.getTranslation(Translation.SourceType.ARTICLE, 18L, "zo");
+        Translation result = instance.getArticleTranslation(18L, "zo");
 
         assertNotNull(result);
         assertEquals(responseTranslation.getId(), result.getId());
@@ -79,11 +78,10 @@ public class ZendeskTranslationTest
     {
         long id = 18;
         String locale = "zo";
-        String url = DEFAULT_URL + "/api/v2/help_center/" + Translation.SourceType.ARTICLE.getUrlPath() + "/" + id + "/translations/" + locale + ".json";
-        Response response = toContentResponse(200, null);
-        setupHttpCall("GET", url, null, response);
+        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations/" + locale + ".json";
+        setupHttpCall("GET", url, null, toContentResponse(200, null));
 
-        Translation result = instance.getTranslation(Translation.SourceType.ARTICLE, 18L, "zo");
+        Translation result = instance.getArticleTranslation(18L, "zo");
 
         assertNull(result);
     }
@@ -92,13 +90,11 @@ public class ZendeskTranslationTest
     public void testCreateTranslation() throws Exception
     {
         long id = 18;
-        String locale = "zo";
-        String url = DEFAULT_URL + "/api/v2/help_center/" + Translation.SourceType.ARTICLE.getUrlPath() + "/" + id + "/translations.json";
-        Translation translation = getTranslation(locale, Translation.SourceType.ARTICLE, id);
-        Response response = toContentResponse(200, translation);
-        setupHttpCall("POST", url, serialize(translation), response);
+        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations.json";
+        Translation translation = getTranslation("zo", id);
+        setupHttpCall("POST", url, serialize(translation), toContentResponse(200, translation));
 
-        Translation result = instance.createTranslation(translation);
+        Translation result = instance.createArticleTranslation(id, translation);
 
         assertNotNull(result);
         assertEquals(translation.getId(), result.getId());
@@ -114,12 +110,11 @@ public class ZendeskTranslationTest
     {
         long id = 18;
         String locale = "zo";
-        String url = DEFAULT_URL + "/api/v2/help_center/" + Translation.SourceType.ARTICLE.getUrlPath() + "/" + id + "/translations/" + locale + ".json";
-        Translation translation = getTranslation(locale, Translation.SourceType.ARTICLE, id);
-        Response response = toContentResponse(200, translation);
-        setupHttpCall("PUT", url, serialize(translation), response);
+        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations/" + locale + ".json";
+        Translation translation = getTranslation(locale, id);
+        setupHttpCall("PUT", url, serialize(translation), toContentResponse(200, translation));
 
-        Translation result = instance.updateTranslation(translation);
+        Translation result = instance.updateArticleTranslation(id, locale, translation);
 
         assertNotNull(result);
         assertEquals(translation.getId(), result.getId());
@@ -137,8 +132,7 @@ public class ZendeskTranslationTest
         Translation translation = new Translation();
         translation.setId(id);
         String url = DEFAULT_URL + "/api/v2/help_center/translations/" + id + ".json";
-        Response response = toContentResponse(200, null);
-        setupHttpCall("DELETE", url, null, response);
+        setupHttpCall("DELETE", url, null, toContentResponse(200, null));
 
         instance.deleteTranslation(translation);
     }
@@ -160,9 +154,9 @@ public class ZendeskTranslationTest
     private Response toContentResponse(Integer responseCode, Translation translation) throws IOException
     {
         Response response = mock(Response.class);
-
         when(response.getStatusCode()).thenReturn(responseCode);
         when(response.getResponseBodyAsStream()).thenReturn(new ByteArrayInputStream(serialize(translation)));
+
         return response;
     }
 
@@ -177,14 +171,15 @@ public class ZendeskTranslationTest
         return translationAsJsonBytes;
     }
 
-    private Translation getTranslation(String locale, Translation.SourceType sourceType, Long sourceId)
+    private Translation getTranslation(String locale, Long sourceId)
     {
         Translation translation = new Translation();
+        translation.setId(442L);
         translation.setLocale(locale);
         translation.setSourceId(sourceId);
-        translation.setSourceType(sourceType.getSourceType());
         translation.setTitle(DEFAULT_TITLE);
         translation.setBody(DEFAULT_BODY);
+
         return translation;
     }
 }

@@ -1,8 +1,6 @@
 package org.zendesk.client.v2.model.hc;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -187,33 +185,4 @@ public class Translation {
           ", createdById=" + createdById + '\'' +
           '}';
   }
-
-    public enum SourceType {
-        ARTICLE("articles", "Article"), CATEGORY("categories", "Category"), SECTION("sections", "Section");
-
-        private String urlPath;
-        private String sourceType;
-
-        SourceType(String urlPath, String sourceName)
-        {
-            this.urlPath = urlPath;
-            this.sourceType = sourceName;
-        }
-
-        public String getUrlPath()
-        {
-            return urlPath;
-        }
-
-        public String getSourceType()
-        {
-            return sourceType;
-        }
-
-        public static SourceType getBySourceName(String sourceName)
-        {
-            Optional<SourceType> type = Arrays.stream(SourceType.values()).filter(t -> t.getSourceType().equals(sourceName)).findFirst();
-            return type.get();
-        }
-    }
 }
