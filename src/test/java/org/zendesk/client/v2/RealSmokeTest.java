@@ -805,7 +805,7 @@ public class RealSmokeTest {
     public void shouldSearchArticleBySection() throws Exception {
         assumeNotNull("Section ID is required to run this test", sectionId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, "en-us", null, sectionId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByQueryAndSection(1, 10, "en-us", "*", sectionId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());

@@ -16,7 +16,6 @@ import com.ning.http.client.Request;
 import com.ning.http.client.RequestBuilder;
 import com.ning.http.client.Response;
 import com.ning.http.client.multipart.FilePart;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zendesk.client.v2.model.Attachment;
@@ -32,6 +31,8 @@ import org.zendesk.client.v2.model.JobStatus;
 import org.zendesk.client.v2.model.Locale;
 import org.zendesk.client.v2.model.Macro;
 import org.zendesk.client.v2.model.Metric;
+import org.zendesk.client.v2.model.oauth.OAuthRequest;
+import org.zendesk.client.v2.model.oauth.OAuthToken;
 import org.zendesk.client.v2.model.Organization;
 import org.zendesk.client.v2.model.OrganizationField;
 import org.zendesk.client.v2.model.SearchResultEntity;
@@ -179,6 +180,13 @@ public class Zendesk implements AutoCloseable {
     //////////////////////////////////////////////////////////////////////
     // Action methods
     //////////////////////////////////////////////////////////////////////
+
+    public String getOAuthToken(String subdomain, String code, String redirectUri, String clientId, String clientSecret) {
+        return complete(submit(reqUnauthorized("POST", new TemplateUri("https://{subdomain}.zendesk.com/oauth/tokens").set("subdomain", subdomain),
+                                JSON, json(new OAuthRequest(code, redirectUri, clientId, clientSecret))
+                        ),
+                handle(OAuthToken.class))).getAccess_token();
+    }
 
     public <T> JobStatus<T> getJobStatus(JobStatus<T> status) {
         return complete(getJobStatusAsync(status));
@@ -1882,6 +1890,14 @@ public class Zendesk implements AutoCloseable {
         } else {
             builder.addHeader("Authorization", "Bearer " + oauthToken);
         }
+        builder.setUrl(RESTRICTED_PATTERN.matcher(template.toString()).replaceAll("+")); //replace out %2B with + due to API restriction
+        builder.addHeader("Content-type", contentType);
+        builder.setBody(body);
+        return builder.build();
+    }
+
+    private Request reqUnauthorized(String method, Uri template, String contentType, byte[] body) {
+        RequestBuilder builder = new RequestBuilder(method);
         builder.setUrl(RESTRICTED_PATTERN.matcher(template.toString()).replaceAll("+")); //replace out %2B with + due to API restriction
         builder.addHeader("Content-type", contentType);
         builder.setBody(body);
