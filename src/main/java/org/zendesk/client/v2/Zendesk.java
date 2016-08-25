@@ -1597,13 +1597,14 @@ public class Zendesk implements AutoCloseable {
         return complete(submit(req("POST", tmpl("/help_center/articles/{articleId}/translations.json")
                     .set("articleId", articleId),
                 JSON, json(Collections.singletonMap("translation", translation))),
-                this.handle(Translation.class, "translation")));
+                handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public Translation updateArticleTranslation(Long articleId, String locale, Translation translation) {
         checkHasId(translation);
         return complete(submit(req("PUT", tmpl("/help_center/articles/{id}/translations/{locale}.json").set("id", articleId).set("locale",locale),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))),
+                handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public void deleteArticle(Article article) {
@@ -1705,13 +1706,14 @@ public class Zendesk implements AutoCloseable {
         return complete(submit(req("POST", tmpl("/help_center/categories/{categoryId}/translations.json")
                         .set("categoryId", categoryId),
                 JSON, json(Collections.singletonMap("translation", translation))),
-                this.handle(Translation.class, "translation")));
+                handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public Translation updateCategoryTranslation(Long categoryId, String locale, Translation translation) {
         checkHasId(translation);
         return complete(submit(req("PUT", tmpl("/help_center/categories/{id}/translations/{locale}.json").set("id", categoryId).set("locale",locale),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))),
+                handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public void deleteCategory(Category category) {
@@ -1837,13 +1839,14 @@ public class Zendesk implements AutoCloseable {
         return complete(submit(req("POST", tmpl("/help_center/sections/{sectionId}/translations.json")
                         .set("sectionId", sectionId),
                 JSON, json(Collections.singletonMap("translation", translation))),
-                this.handle(Translation.class, "translation")));
+                handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public Translation updateSectionTranslation(Long sectionId, String locale, Translation translation) {
         checkHasId(translation);
         return complete(submit(req("PUT", tmpl("/help_center/sections/{id}/translations/{locale}.json").set("id", sectionId).set("locale",locale),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))),
+                handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public void deleteSection(Section section) {
@@ -1978,7 +1981,7 @@ public class Zendesk implements AutoCloseable {
         private final String name;
         private final Class[] typeParams;
 
-        public BasicAsyncCompletionHandler(Class clazz, String name, Class... typeParams) {
+        public BasicAsyncCompletionHandler(Class<T> clazz, String name, Class... typeParams) {
             this.clazz = clazz;
             this.name = name;
             this.typeParams = typeParams;
@@ -1994,19 +1997,38 @@ public class Zendesk implements AutoCloseable {
                 }
                 return mapper.convertValue(mapper.readTree(response.getResponseBodyAsStream()).get(name), clazz);
             }
-            if (response.getStatusCode() == 404) {
-                return null;
-            }
+
             throw ZendeskResponseException.fromResponse(response);
         }
     }
 
+    private class BasicAsyncCompletionHandlerWithNullIfNotFound<T> extends BasicAsyncCompletionHandler<T> {
+        public BasicAsyncCompletionHandlerWithNullIfNotFound(Class clazz, String name, Class... typeParams) {
+            super(clazz, name, typeParams);
+        }
+
+        @Override
+        public T onCompleted(Response response) throws Exception {
+            logResponse(response);
+
+            if (response.getStatusCode() == 404) {
+                return null;
+            } else {
+                return super.onCompleted(response);
+            }
+        }
+    }
+
     protected <T> ZendeskAsyncCompletionHandler<T> handle(final Class<T> clazz, final String name, final Class... typeParams) {
+        return new BasicAsyncCompletionHandlerWithNullIfNotFound<T>(clazz, name, typeParams);
+    }
+
+    private <T> ZendeskAsyncCompletionHandler<T> handleWithExceptionIfNotFound(final Class<T> clazz, final String name, final Class... typeParams) {
         return new BasicAsyncCompletionHandler<T>(clazz, name, typeParams);
     }
 
     protected <T> ZendeskAsyncCompletionHandler<JobStatus<T>> handleJobStatus(final Class<T> resultClass) {
-        return new BasicAsyncCompletionHandler<JobStatus<T>>(JobStatus.class, "job_status", resultClass) {
+        return new BasicAsyncCompletionHandlerWithNullIfNotFound<JobStatus<T>>(JobStatus.class, "job_status", resultClass) {
             @Override
             public JobStatus<T> onCompleted(Response response) throws Exception {
                 JobStatus<T> result = super.onCompleted(response);
