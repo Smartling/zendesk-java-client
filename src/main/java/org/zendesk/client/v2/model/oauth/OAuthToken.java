@@ -1,29 +1,33 @@
 package org.zendesk.client.v2.model.oauth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class OAuthToken
 {
-    private String access_token;
-    private String token_type;
+    @JsonProperty ("access_token")
+    private String accessToken;
+    @JsonProperty ("token_type")
+    private String tokenType;
     private String scope;
 
-    public String getAccess_token()
+    public String getAccessToken()
     {
-        return access_token;
+        return accessToken;
     }
 
-    public void setAccess_token(final String access_token)
+    public void setAccessToken(final String accessToken)
     {
-        this.access_token = access_token;
+        this.accessToken = accessToken;
     }
 
-    public String getToken_type()
+    public String getTokenType()
     {
-        return token_type;
+        return tokenType;
     }
 
-    public void setToken_type(final String token_type)
+    public void setTokenType(final String tokenType)
     {
-        this.token_type = token_type;
+        this.tokenType = tokenType;
     }
 
     public String getScope()

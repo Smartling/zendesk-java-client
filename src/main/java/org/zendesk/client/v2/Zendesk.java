@@ -186,7 +186,7 @@ public class Zendesk implements AutoCloseable {
         return complete(submit(reqUnauthorized("POST", new TemplateUri("https://{subdomain}.zendesk.com/oauth/tokens").set("subdomain", subdomain),
                                 JSON, json(new OAuthRequest(code, redirectUri, clientId, clientSecret))
                         ),
-                handle(OAuthToken.class))).getAccess_token();
+                handle(OAuthToken.class))).getAccessToken();
     }
 
     public <T> JobStatus<T> getJobStatus(JobStatus<T> status) {

@@ -1,25 +1,31 @@
 package org.zendesk.client.v2.model.oauth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class OAuthRequest
 {
-    private final String grant_type = "authorization_code";
+    @JsonProperty ("grant_type")
+    private final String grantType = "authorization_code";
     private final String code;
-    private final String client_id;
-    private final String client_secret;
-    private final String redirect_uri;
+    @JsonProperty ("client_id")
+    private final String clientId;
+    @JsonProperty ("client_secret")
+    private final String clientSecret;
+    @JsonProperty ("redirect_uri")
+    private final String redirectUri;
     private final String scope = "read";
 
-    public OAuthRequest(final String code, final String redirect_uri, final String client_id, final String client_secret)
+    public OAuthRequest(final String code, final String redirectUri, final String clientId, final String clientSecret)
     {
         this.code = code;
-        this.client_id = client_id;
-        this.client_secret = client_secret;
-        this.redirect_uri = redirect_uri;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.redirectUri = redirectUri;
     }
 
-    public String getGrant_type()
+    public String getGrantType()
     {
-        return grant_type;
+        return grantType;
     }
 
     public String getCode()
@@ -27,19 +33,19 @@ public class OAuthRequest
         return code;
     }
 
-    public String getClient_id()
+    public String getClientId()
     {
-        return client_id;
+        return clientId;
     }
 
-    public String getClient_secret()
+    public String getClientSecret()
     {
-        return client_secret;
+        return clientSecret;
     }
 
-    public String getRedirect_uri()
+    public String getRedirectUri()
     {
-        return redirect_uri;
+        return redirectUri;
     }
 
     public String getScope()
