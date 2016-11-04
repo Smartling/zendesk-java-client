@@ -1548,12 +1548,12 @@ public class Zendesk implements AutoCloseable {
      * @deprecated Prefer version with explicit locale
      */
     @Deprecated
-    public Article getArticle(int id) {
+    public Article getArticle(long id) {
         return complete(submit(req("GET", tmpl("/help_center/articles/{id}.json").set("id", id)),
                 handle(Article.class, "article")));
     }
 
-    public Article getArticle(String locale, int id) {
+    public Article getArticle(String locale, long id) {
         return complete(submit(req("GET", tmpl("/help_center/{locale}/articles/{id}.json")
                         .set("id", id).set("locale", locale)),
                 handle(Article.class, "article")));
@@ -1658,12 +1658,12 @@ public class Zendesk implements AutoCloseable {
      * @deprecated Prefer version with explicit locale
      */
     @Deprecated
-    public Category getCategory(int id) {
+    public Category getCategory(long id) {
         return complete(submit(req("GET", tmpl("/help_center/categories/{id}.json").set("id", id)),
                 handle(Category.class, "category")));
     }
 
-    public Category getCategory(String locale, int id) {
+    public Category getCategory(String locale, long id) {
         return complete(submit(req("GET", tmpl("/help_center/{locale}/categories/{id}.json")
                 .set("id", id).set("locale", locale)),
                 handle(Category.class, "category")));
@@ -1791,12 +1791,12 @@ public class Zendesk implements AutoCloseable {
      * @deprecated Prefer version with explicit locale
      */
     @Deprecated
-    public Section getSection(int id) {
+    public Section getSection(long id) {
         return complete(submit(req("GET", tmpl("/help_center/sections/{id}.json").set("id", id)),
                 handle(Section.class, "section")));
     }
 
-    public Section getSection(String locale, int id) {
+    public Section getSection(String locale, long id) {
         return complete(submit(req("GET", tmpl("/help_center/{locale}/sections/{id}.json")
                 .set("id", id).set("locale", locale)),
                 handle(Section.class, "section")));
