@@ -1535,6 +1535,15 @@ public class Zendesk implements AutoCloseable {
         ));
     }
 
+    public DynamicContentItem getDynamicContentItem(long dynamicContentId) {
+        return complete(submit(
+                req("GET", tmpl("/dynamic_content/items/{id}.json")
+                        .set("id", dynamicContentId)
+                ),
+                handle(DynamicContentItem.class, "item")
+        ));
+    }
+
     /**
      * @deprecated Prefer version with explicit locale
      */
