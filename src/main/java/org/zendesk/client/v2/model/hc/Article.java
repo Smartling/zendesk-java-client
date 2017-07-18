@@ -38,7 +38,13 @@ public class Article implements SearchResultEntity {
     @JsonProperty("comments_disabled")
     private Boolean commentsDisabled;
 
-    /** Whether the source (default) translation of the article is out of date */
+    /** Locales in which the article was marked as outdated. */
+    @JsonProperty("outdated_locales")
+    private List<String> outdatedLocales;
+
+    /** Whether the source (default) translation of the article is out of date.
+     * Deprecated. Always false because the source translation is always the most up-to-date translation.
+     */
     private Boolean outdated;
 
     /** An array of label names associated with this article. By default no label names are used. Only available on certain plans */
@@ -144,6 +150,16 @@ public class Article implements SearchResultEntity {
 
     public void setCommentsDisabled(Boolean commentsDisabled) {
         this.commentsDisabled = commentsDisabled;
+    }
+
+    public List<String> getOutdatedLocales()
+    {
+        return outdatedLocales;
+    }
+
+    public void setOutdatedLocales(List<String> outdatedLocales)
+    {
+        this.outdatedLocales = outdatedLocales;
     }
 
     public Boolean getOutdated() {
