@@ -1921,27 +1921,25 @@ public class Zendesk implements AutoCloseable {
         return req(method, template.toString());
     }
 
-    private static final Pattern RESTRICTED_PATTERN = Pattern.compile("%2B", Pattern.LITERAL);
-
     private Request req(String method, String url) {
         RequestBuilder builder = new RequestBuilder(method);
+        builder.setUrl(url);
         if (realm != null) {
             builder.setRealm(realm);
         } else {
             builder.addHeader("Authorization", "Bearer " + oauthToken);
         }
-        builder.setUrl(RESTRICTED_PATTERN.matcher(url).replaceAll("+")); // replace out %2B with + due to API restriction
         return builder.build();
     }
 
     private Request req(String method, Uri template, String contentType, byte[] body) {
         RequestBuilder builder = new RequestBuilder(method);
+        builder.setUrl(template.toString());
         if (realm != null) {
             builder.setRealm(realm);
         } else {
             builder.addHeader("Authorization", "Bearer " + oauthToken);
         }
-        builder.setUrl(RESTRICTED_PATTERN.matcher(template.toString()).replaceAll("+")); //replace out %2B with + due to API restriction
         builder.addHeader("Content-type", contentType);
         builder.setBody(body);
         return builder.build();
@@ -1949,7 +1947,7 @@ public class Zendesk implements AutoCloseable {
 
     private Request reqUnauthorized(String method, Uri template, String contentType, byte[] body) {
         RequestBuilder builder = new RequestBuilder(method);
-        builder.setUrl(RESTRICTED_PATTERN.matcher(template.toString()).replaceAll("+")); //replace out %2B with + due to API restriction
+        builder.setUrl(template.toString());
         builder.addHeader("Content-type", contentType);
         builder.setBody(body);
         return builder.build();
