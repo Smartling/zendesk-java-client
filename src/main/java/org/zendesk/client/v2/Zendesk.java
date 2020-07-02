@@ -118,7 +118,7 @@ public class Zendesk implements Closeable {
        result.put("group", Group.class);
        result.put("organization", Organization.class);
        result.put("topic", Topic.class);
-        result.put("article", Article.class);
+       result.put("article", Article.class);
        return Collections.unmodifiableMap(result);
     }
 
@@ -1678,6 +1678,18 @@ public class Zendesk implements Closeable {
         return new PagedIterable<>(cnst("/dynamic_content/items.json"), handleList(DynamicContentItem.class, "items"));
     }
 
+    public Iterable<DynamicContentItem> getDynamicContentItems(int page, int perPage, String sortBy, SortOrder sortOrder) {
+        return complete(submit(
+                req("GET", tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                        .set("page", page)
+                        .set("per_page", perPage)
+                        .set("sort_by", sortBy)
+                        .set("sort_order", sortOrder.getQueryParameter())
+                ),
+                handleList(DynamicContentItem.class, "items")
+        ));
+    }
+
     public DynamicContentItem getDynamicContentItem(long id) {
         return complete(submit(req("GET", tmpl("/dynamic_content/items/{id}.json").set("id", id)), handle(DynamicContentItem.class, "item")));
     }
@@ -1703,8 +1715,13 @@ public class Zendesk implements Closeable {
 
     public Iterable<DynamicContentItemVariant> getDynamicContentItemVariants(DynamicContentItem item) {
         checkHasId(item);
+        return getDynamicContentItemVariants(item.getId());
+    }
+
+    public Iterable<DynamicContentItemVariant> getDynamicContentItemVariants(Long itemId) {
+        checkHasItemId(itemId);
         return new PagedIterable<>(
-                tmpl("/dynamic_content/items/{id}/variants.json").set("id", item.getId()),
+                tmpl("/dynamic_content/items/{id}/variants.json").set("id", itemId),
                 handleList(DynamicContentItemVariant.class, "variants"));
     }
 

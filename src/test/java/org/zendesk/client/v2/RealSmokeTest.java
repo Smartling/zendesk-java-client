@@ -1189,6 +1189,26 @@ public class RealSmokeTest {
     }
 
     @Test
+    public void getDynamicContentItemsPaged() throws Exception {
+        createClientWithTokenOrPassword();
+
+        Iterable<DynamicContentItem> items = (instance.getDynamicContentItems(1, 5, "created_at", SortOrder.DESCENDING));
+
+        int count = 0;
+        DynamicContentItem previous = null;
+        for (DynamicContentItem item : items) {
+            if (previous != null)
+            {
+                assertTrue(previous.getCreatedAt().after(item.getCreatedAt()));
+            }
+            previous = item;
+
+            count++;
+        }
+        assertEquals(5, count);
+    }
+
+    @Test
     public void getTicketCommentsShouldBeAscending() throws Exception {
         createClientWithTokenOrPassword();
 
