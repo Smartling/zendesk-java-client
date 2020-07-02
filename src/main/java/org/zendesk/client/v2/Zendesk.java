@@ -42,6 +42,7 @@ import org.zendesk.client.v2.model.SatisfactionRating;
 import org.zendesk.client.v2.model.SearchResultEntity;
 import org.zendesk.client.v2.model.SortOrder;
 import org.zendesk.client.v2.model.Status;
+import org.zendesk.client.v2.model.SupportCenterLocale;
 import org.zendesk.client.v2.model.SuspendedTicket;
 import org.zendesk.client.v2.model.Ticket;
 import org.zendesk.client.v2.model.TicketForm;
@@ -86,6 +87,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -1750,6 +1752,25 @@ public class Zendesk implements Closeable {
     }
 
     // TODO search with query building API
+
+    //////////////////////////////////////////////////////////////////////
+    // Support Center locales
+    //////////////////////////////////////////////////////////////////////
+    /**
+     * Get enabled locales for Support Center
+     * @return
+     */
+    public List<SupportCenterLocale> getEnabledSupportCenterLocales() {
+        return (List)complete(this.submit(this.req("GET", this.cnst("/locales.json")), this.handleList(Locale.class, "locales")));
+    }
+
+    /**
+     * Get all available locales for Support Center
+     * @return
+     */
+    public List<SupportCenterLocale> getAvailableSupportCenterLocales() {
+        return (List)complete(this.submit(this.req("GET", this.cnst("/locales/public.json")), this.handleList(Locale.class, "locales")));
+    }
 
     //////////////////////////////////////////////////////////////////////
     // Action methods for Help Center

@@ -22,6 +22,7 @@ import org.zendesk.client.v2.model.Priority;
 import org.zendesk.client.v2.model.Request;
 import org.zendesk.client.v2.model.SortOrder;
 import org.zendesk.client.v2.model.Status;
+import org.zendesk.client.v2.model.SupportCenterLocale;
 import org.zendesk.client.v2.model.SuspendedTicket;
 import org.zendesk.client.v2.model.Ticket;
 import org.zendesk.client.v2.model.TicketForm;
@@ -1206,6 +1207,34 @@ public class RealSmokeTest {
             count++;
         }
         assertEquals(5, count);
+    }
+
+    @Test
+    public void getEnabledSupportCenterLocales() throws Exception
+    {
+        createClientWithTokenOrPassword();
+        int count = 0;
+        for (SupportCenterLocale locale : instance.getEnabledSupportCenterLocales()) {
+            assertThat(locale.getName(), notNullValue());
+            assertThat(locale.getId(), notNullValue());
+            if (++count > 10) {
+                break;
+            }
+        }
+    }
+
+    @Test
+    public void getAvailableSupportCenterLocales() throws Exception
+    {
+        createClientWithTokenOrPassword();
+        int count = 0;
+        for (SupportCenterLocale locale : instance.getAvailableSupportCenterLocales()) {
+            assertThat(locale.getName(), notNullValue());
+            assertThat(locale.getId(), notNullValue());
+            if (++count > 10) {
+                break;
+            }
+        }
     }
 
     @Test
