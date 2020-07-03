@@ -101,6 +101,7 @@ import java.util.regex.Pattern;
  * @author stephenc
  * @since 04/04/2013 13:08
  */
+@SuppressWarnings("ALL")
 public class Zendesk implements Closeable {
     private static final String JSON = "application/json; charset=UTF-8";
     private final boolean closeClient;
@@ -2070,8 +2071,25 @@ public class Zendesk implements Closeable {
                 handleList(Category.class, "categories"));
     }
 
+    public Iterable<Category> getCategories(String locale, Page page, Sorting sorting) {
+        return new PagedIterable<>(
+                        tmpl("/help_center/{locale}/categories.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("page", page.getPageNo())
+                                .set("per_page", page.getPerPage())
+                                .set("sort_by", sorting.getSortBy())
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter()),
+                handleList(Category.class, "categories"));
+    }
+
     public Category getCategory(long id) {
         return complete(submit(req("GET", tmpl("/help_center/categories/{id}.json").set("id", id)),
+                handle(Category.class, "category")));
+    }
+
+    public Category getCategory(String locale, long id) {
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/categories/{id}.json")
+                .set("id", id).set("locale", locale)),
                 handle(Category.class, "category")));
     }
 
@@ -2080,6 +2098,15 @@ public class Zendesk implements Closeable {
                 tmpl("/help_center/categories/{categoryId}/translations.json").set("categoryId", categoryId),
                 handleList(Translation.class, "translations"));
     }
+
+    public Translation getCategoryTranslation(Long categoryId, String locale) {
+        return complete(submit(req("GET", tmpl("/help_center/categories/{categoryId}/translations/{locale}.json")
+                        .set("categoryId", categoryId)
+                        .set("locale", locale)),
+                handle(Translation.class, "translation")
+        ));
+    }
+
     public Category createCategory(Category category) {
         return complete(submit(req("POST", cnst("/help_center/categories.json"),
                 JSON, json(Collections.singletonMap("category", category))), handle(Category.class, "category")));

@@ -73,6 +73,7 @@ import static org.junit.Assume.assumeThat;
  * @author stephenc
  * @since 04/04/2013 13:57
  */
+@SuppressWarnings({"deprecation", "RedundantThrows", "unchecked", "StatementWithEmptyBody", "rawtypes"})
 public class RealSmokeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RealSmokeTest.class);
