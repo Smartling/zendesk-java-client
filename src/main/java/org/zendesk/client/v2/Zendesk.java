@@ -2121,8 +2121,37 @@ public class Zendesk implements Closeable {
                 handleList(Section.class, "sections"));
     }
 
+    public Iterable<Section> getSections(String locale, Page page, Sorting sorting) {
+        return new PagedIterable<>(
+                tmpl("/help_center/{locale}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                        .set("locale", locale)
+                        .set("page", page.getPageNo())
+                        .set("per_page", page.getPerPage())
+                        .set("sort_by", sorting.getSortBy())
+                        .set("sort_order", sorting.getSortOrder().getQueryParameter()),
+        handleList(Section.class, "sections"));
+    }
+
+    public Iterable<Section> getSections(String locale, Category category, Page page, Sorting sorting) {
+        checkHasId(category);
+        return new PagedIterable<>(
+                tmpl("/help_center/{locale}/categories/{categoryId}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                        .set("locale", locale)
+                        .set("categoryId", category.getId())
+                        .set("page", page.getPageNo())
+                        .set("per_page", page.getPerPage())
+                        .set("sort_by", sorting.getSortBy())
+                        .set("sort_order", sorting.getSortOrder().getQueryParameter()),
+        handleList(Section.class, "sections"));
+    }
+
     public Section getSection(long id) {
         return complete(submit(req("GET", tmpl("/help_center/sections/{id}.json").set("id", id)),
+                handle(Section.class, "section")));
+    }
+
+    public Section getSection(String locale, long id) {
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/sections/{sectionId}.json").set("id", id).set("locale", locale)),
                 handle(Section.class, "section")));
     }
 
@@ -2131,6 +2160,12 @@ public class Zendesk implements Closeable {
                 tmpl("/help_center/sections/{sectionId}/translations.json").set("sectionId", sectionId),
                 handleList(Translation.class, "translations"));
     }
+
+    public Translation getSectionTranslation(String locale, long sectionId) {
+        return complete(submit(req("GET", tmpl("/help_center/sections/{sectionId}/translations/{locale}.json").set("sectionId", sectionId).set("locale", locale)),
+                handle(Translation.class, "translation")));
+    }
+
     public Section createSection(Section section) {
         checkHasCategoryId(section);
         return complete(submit(req("POST", tmpl("/help_center/categories/{id}/sections.json").set("id", section.getCategoryId()),
