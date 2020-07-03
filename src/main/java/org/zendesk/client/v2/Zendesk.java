@@ -38,9 +38,11 @@ import org.zendesk.client.v2.model.Metric;
 import org.zendesk.client.v2.model.Organization;
 import org.zendesk.client.v2.model.OrganizationField;
 import org.zendesk.client.v2.model.OrganizationMembership;
+import org.zendesk.client.v2.model.Page;
 import org.zendesk.client.v2.model.SatisfactionRating;
 import org.zendesk.client.v2.model.SearchResultEntity;
 import org.zendesk.client.v2.model.SortOrder;
+import org.zendesk.client.v2.model.Sorting;
 import org.zendesk.client.v2.model.Status;
 import org.zendesk.client.v2.model.SupportCenterLocale;
 import org.zendesk.client.v2.model.SuspendedTicket;
@@ -1680,16 +1682,13 @@ public class Zendesk implements Closeable {
         return new PagedIterable<>(cnst("/dynamic_content/items.json"), handleList(DynamicContentItem.class, "items"));
     }
 
-    public Iterable<DynamicContentItem> getDynamicContentItems(int page, int perPage, String sortBy, SortOrder sortOrder) {
-        return complete(submit(
-                req("GET", tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
-                        .set("page", page)
-                        .set("per_page", perPage)
-                        .set("sort_by", sortBy)
-                        .set("sort_order", sortOrder.getQueryParameter())
-                ),
-                handleList(DynamicContentItem.class, "items")
-        ));
+    public Iterable<DynamicContentItem> getDynamicContentItems(Page page, Sorting sorting) {
+        return new PagedIterable<>(tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                        .set("page", page.getPageNo())
+                        .set("per_page", page.getPerPage())
+                        .set("sort_by", sorting.getSortBy())
+                        .set("sort_order", sorting.getSortOrder().getQueryParameter()),
+                handleList(DynamicContentItem.class, "items"));
     }
 
     public DynamicContentItem getDynamicContentItem(long id) {

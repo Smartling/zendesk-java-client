@@ -18,9 +18,11 @@ import org.zendesk.client.v2.model.Group;
 import org.zendesk.client.v2.model.Identity;
 import org.zendesk.client.v2.model.JobStatus;
 import org.zendesk.client.v2.model.Organization;
+import org.zendesk.client.v2.model.Page;
 import org.zendesk.client.v2.model.Priority;
 import org.zendesk.client.v2.model.Request;
 import org.zendesk.client.v2.model.SortOrder;
+import org.zendesk.client.v2.model.Sorting;
 import org.zendesk.client.v2.model.Status;
 import org.zendesk.client.v2.model.SupportCenterLocale;
 import org.zendesk.client.v2.model.SuspendedTicket;
@@ -1193,7 +1195,7 @@ public class RealSmokeTest {
     public void getDynamicContentItemsPaged() throws Exception {
         createClientWithTokenOrPassword();
 
-        Iterable<DynamicContentItem> items = (instance.getDynamicContentItems(1, 5, "created_at", SortOrder.DESCENDING));
+        Iterable<DynamicContentItem> items = (instance.getDynamicContentItems(new Page(1, 5), new Sorting("created_at", SortOrder.DESCENDING)));
 
         int count = 0;
         DynamicContentItem previous = null;
