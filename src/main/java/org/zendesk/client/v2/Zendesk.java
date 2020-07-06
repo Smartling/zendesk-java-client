@@ -66,6 +66,8 @@ import org.zendesk.client.v2.model.hc.Subscription;
 import org.zendesk.client.v2.model.hc.Translation;
 import org.zendesk.client.v2.model.hc.PermissionGroup;
 import org.zendesk.client.v2.model.hc.UserSegment;
+import org.zendesk.client.v2.model.oauth.OAuthRequest;
+import org.zendesk.client.v2.model.oauth.OAuthToken;
 import org.zendesk.client.v2.model.schedules.Holiday;
 import org.zendesk.client.v2.model.schedules.Schedule;
 import org.zendesk.client.v2.model.targets.BasecampTarget;
@@ -101,7 +103,6 @@ import java.util.regex.Pattern;
  * @author stephenc
  * @since 04/04/2013 13:08
  */
-@SuppressWarnings("ALL")
 public class Zendesk implements Closeable {
     private static final String JSON = "application/json; charset=UTF-8";
     private final boolean closeClient;
@@ -206,6 +207,13 @@ public class Zendesk implements Closeable {
     //////////////////////////////////////////////////////////////////////
     // Action methods
     //////////////////////////////////////////////////////////////////////
+
+    public String getOAuthToken(String subdomain, String code, String redirectUri, String clientId, String clientSecret) {
+        return complete(submit(reqUnauthorized("POST", new TemplateUri("https://{subdomain}.zendesk.com/oauth/tokens").set("subdomain", subdomain),
+                JSON, json(new OAuthRequest(code, redirectUri, clientId, clientSecret))
+                ),
+                handle(OAuthToken.class))).getAccessToken();
+    }
 
     public <T> JobStatus<T> getJobStatus(JobStatus<T> status) {
         return complete(getJobStatusAsync(status));
@@ -2408,6 +2416,14 @@ public class Zendesk implements Closeable {
         }
         headers.forEach(builder::setHeader);
         return builder.setUrl(RESTRICTED_PATTERN.matcher(url).replaceAll("+")); // replace out %2B with + due to API restriction
+    }
+
+    private Request reqUnauthorized(String method, Uri template, String contentType, byte[] body) {
+        RequestBuilder builder = new RequestBuilder(method);
+        builder.setUrl(template.toString());
+        builder.addHeader("Content-type", contentType);
+        builder.setBody(body);
+        return builder.build();
     }
 
     protected ZendeskAsyncCompletionHandler<Void> handleStatus() {
