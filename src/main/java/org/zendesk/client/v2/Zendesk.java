@@ -416,6 +416,31 @@ public class Zendesk implements Closeable {
                 .set("query", searchTerm).set("section", sectionId), handleList(Article.class, "results"));
     }
 
+    public Iterable<Article> getArticlesByQueryAndSection(String locale, String searchTerm, Section section, Category category, Page page) {
+
+        TemplateUri tmpl = tmpl("/help_center/articles/search.json{?locale, query, category, section, page, per_page")
+                .set("locale", locale)
+                .set("query", searchTerm);
+
+        if(category != null)
+        {
+            tmpl.set("category", category.getId());
+        }
+
+        if(section != null)
+        {
+            tmpl.set("section", section.getId());
+        }
+
+        if(page != null)
+        {
+            tmpl.set("page", page.getPageNo());
+            tmpl.set("per_page", page.getPerPage());
+        }
+
+        return new PagedIterable<>(tmpl, handleList(Article.class, "results"));
+    }
+
     public Iterable<Article> getArticlesFromAnyLabels(List<String> labels) {
         return new PagedIterable<>(tmpl("/help_center/articles/search.json{?label_names}").set("label_names", labels),
               handleList(Article.class, "results"));
@@ -428,6 +453,13 @@ public class Zendesk implements Closeable {
 
     public List<ArticleAttachments> getAttachmentsFromArticle(Long articleID) {
         return complete(submit(req("GET", tmpl("/help_center/articles/{id}/attachments.json").set("id", articleID)),
+                handleArticleAttachmentsList("article_attachments")));
+    }
+
+    public List<ArticleAttachments> getAttachmentsFromArticle(String locale, Long articleId) {
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/articles/{articleId}/attachments.json")
+                        .set("locale", locale)
+                        .set("articleId", articleId)),
                 handleArticleAttachmentsList("article_attachments")));
     }
 
@@ -1979,8 +2011,27 @@ public class Zendesk implements Closeable {
                 handleList(Article.class, "articles")));
     }
 
+    public Iterable<Article> getArticles(String locale, Page page, Sorting sorting) {
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/articles.json{?page, per_page, sort_by, sort_order}")
+                                .set("locale", locale)
+                                .set("page", page.getPageNo())
+                                .set("per_page", page.getPerPage())
+                                .set("sort_by", sorting.getSortBy())
+                                .set("sort_order", sorting.getSortOrder())
+                ),
+                handleList(Article.class, "articles")));
+    }
+
     public Article getArticle(long id) {
         return complete(submit(req("GET", tmpl("/help_center/articles/{id}.json").set("id", id)),
+                handle(Article.class, "article")));
+    }
+
+    public Article getArticle(String locale, long id) {
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/articles/{id}.json")
+                        .set("id", id).set("locale", locale)),
                 handle(Article.class, "article")));
     }
 
@@ -1988,6 +2039,14 @@ public class Zendesk implements Closeable {
         return new PagedIterable<>(
                 tmpl("/help_center/articles/{articleId}/translations.json").set("articleId", articleId),
                 handleList(Translation.class, "translations"));
+    }
+
+    public Translation getArticleTranslation(Long articleId, String locale) {
+        return complete(submit(req("GET", tmpl("/help_center/articles/{articleId}/translations/{locale}.json")
+                .set("articleId", articleId)
+                .set("locale", locale)),
+                handle(Translation.class, "translation")
+        ));
     }
 
     public Article createArticle(Article article) {
