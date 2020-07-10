@@ -187,6 +187,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs specfic ticket form instance")
     public void getTicketForm() throws Exception {
         createClientWithTokenOrPassword();
         TicketForm ticketForm = instance.getTicketForm(PUBLIC_FORM_ID);
@@ -195,6 +196,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore
     public void getTicketForms() throws Exception {
         createClientWithTokenOrPassword();
         Iterable<TicketForm> ticketForms = instance.getTicketForms();
@@ -205,6 +207,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs specfic ticket form instance")
     public void getTicketFieldsOnForm() throws Exception {
         createClientWithTokenOrPassword();
         TicketForm ticketForm = instance.getTicketForm(PUBLIC_FORM_ID);
@@ -231,6 +234,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs test data setup correctly")
     public void getTicketsPagesRequests() throws Exception {
         createClientWithTokenOrPassword();
         int count = 0;
@@ -244,6 +248,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs test data setup correctly")
     public void getRecentTickets() throws Exception {
         createClientWithTokenOrPassword();
         int count = 0;
@@ -258,6 +263,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore
     public void getTicketsById() throws Exception {
         createClientWithTokenOrPassword();
         long count = 24;
@@ -337,6 +343,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void createDeleteTicket() throws Exception {
         createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
@@ -367,6 +374,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void createPermanentlyDeleteTicket() throws Exception {
         createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
@@ -425,6 +433,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void createSolveTickets() throws Exception {
         createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
@@ -453,6 +462,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void testUpdateTickets() throws Exception {
         createClientWithTokenOrPassword();
         Ticket t = new Ticket(
