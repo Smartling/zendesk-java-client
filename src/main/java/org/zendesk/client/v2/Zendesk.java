@@ -2403,8 +2403,6 @@ public class Zendesk implements Closeable {
         return req(method, template.toString());
     }
 
-    private static final Pattern RESTRICTED_PATTERN = Pattern.compile("%2B", Pattern.LITERAL);
-
     private Request req(String method, String url) {
         return reqBuilder(method, url).build();
     }
@@ -2424,7 +2422,7 @@ public class Zendesk implements Closeable {
             builder.addHeader("Authorization", "Bearer " + oauthToken);
         }
         headers.forEach(builder::setHeader);
-        return builder.setUrl(RESTRICTED_PATTERN.matcher(url).replaceAll("+")); // replace out %2B with + due to API restriction
+        return builder.setUrl(url);
     }
 
     private Request reqUnauthorized(String method, Uri template, String contentType, byte[] body) {
