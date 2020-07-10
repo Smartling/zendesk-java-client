@@ -76,7 +76,7 @@ public class SearchTest {
     public void getSearchResults_Sorting() throws JsonProcessingException, UnsupportedEncodingException {
 
         String query = "Greenbriar";
-        String expectedQuery = query + " type:ticket";
+        String expectedQuery = query + "+type:ticket";
         String expectedSortBy = "updated_at";
         String expectedSortOrder = "asc";
 
