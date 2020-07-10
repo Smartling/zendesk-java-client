@@ -425,7 +425,7 @@ public class Zendesk implements Closeable {
 
     public Iterable<Article> getArticleFromSearch(String locale, String searchTerm, Section section, Category category, Page page) {
 
-        TemplateUri tmpl = tmpl("/help_center/articles/search.json{?locale,query,category,section,page,per_page")
+        TemplateUri tmpl = tmpl("/help_center/articles/search.json{?locale,query,category,section,page,per_page}")
                 .set("locale", locale)
                 .set("query", searchTerm);
 
