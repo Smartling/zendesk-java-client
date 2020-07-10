@@ -425,7 +425,7 @@ public class Zendesk implements Closeable {
 
     public Iterable<Article> getArticleFromSearch(String locale, String searchTerm, Section section, Category category, Page page) {
 
-        TemplateUri tmpl = tmpl("/help_center/articles/search.json{?locale, query, category, section, page, per_page")
+        TemplateUri tmpl = tmpl("/help_center/articles/search.json{?locale,query,category,section,page,per_page")
                 .set("locale", locale)
                 .set("query", searchTerm);
 
@@ -2024,7 +2024,7 @@ public class Zendesk implements Closeable {
     public Iterable<Article> getArticles(String locale, Page page, Sorting sorting) {
         return complete(submit(
                 req("GET",
-                        tmpl("/help_center/{locale}/articles.json{?page, per_page, sort_by, sort_order}")
+                        tmpl("/help_center/{locale}/articles.json{?page,per_page,sort_by,sort_order}")
                                 .set("locale", locale)
                                 .set("page", page.getPageNo())
                                 .set("per_page", page.getPerPage())
