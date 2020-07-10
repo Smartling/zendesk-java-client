@@ -2029,7 +2029,7 @@ public class Zendesk implements Closeable {
                                 .set("page", page.getPageNo())
                                 .set("per_page", page.getPerPage())
                                 .set("sort_by", sorting.getSortBy())
-                                .set("sort_order", sorting.getSortOrder())
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
                 ),
                 handleList(Article.class, "articles")));
     }
