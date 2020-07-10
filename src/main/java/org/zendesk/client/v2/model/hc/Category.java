@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class Category {
     /** Automatically assigned when creating categories */
@@ -141,6 +142,34 @@ public class Category {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Category category = (Category) o;
+        return Objects.equals(id, category.id) &&
+                Objects.equals(name, category.name) &&
+                Objects.equals(description, category.description) &&
+                Objects.equals(locale, category.locale) &&
+                Objects.equals(sourceLocale, category.sourceLocale) &&
+                Objects.equals(url, category.url) &&
+                Objects.equals(htmlUrl, category.htmlUrl) &&
+                Objects.equals(outdated, category.outdated) &&
+                Objects.equals(position, category.position) &&
+                Objects.equals(translation_ids, category.translation_ids) &&
+                Objects.equals(createdAt, category.createdAt) &&
+                Objects.equals(updatedAt, category.updatedAt);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(id, name, description, locale, sourceLocale, url, htmlUrl, outdated, position, translation_ids, createdAt, updatedAt);
     }
 
     @Override

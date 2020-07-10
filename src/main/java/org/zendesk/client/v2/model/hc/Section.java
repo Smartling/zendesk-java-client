@@ -2,6 +2,7 @@ package org.zendesk.client.v2.model.hc;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -153,6 +154,35 @@ public class Section {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Section section = (Section) o;
+        return Objects.equals(id, section.id) &&
+                Objects.equals(name, section.name) &&
+                Objects.equals(description, section.description) &&
+                Objects.equals(locale, section.locale) &&
+                Objects.equals(sourceLocale, section.sourceLocale) &&
+                Objects.equals(url, section.url) &&
+                Objects.equals(htmlUrl, section.htmlUrl) &&
+                Objects.equals(categoryId, section.categoryId) &&
+                Objects.equals(outdated, section.outdated) &&
+                Objects.equals(position, section.position) &&
+                Objects.equals(translation_ids, section.translation_ids) &&
+                Objects.equals(createdAt, section.createdAt) &&
+                Objects.equals(updatedAt, section.updatedAt);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(id, name, description, locale, sourceLocale, url, htmlUrl, categoryId, outdated, position, translation_ids, createdAt, updatedAt);
     }
 
     @Override
