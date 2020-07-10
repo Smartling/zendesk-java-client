@@ -446,7 +446,7 @@ public class Zendesk implements Closeable {
             tmpl.set("per_page", page.getPerPage());
         }
 
-        return new PagedIterable<>(tmpl, handleList(Article.class, "results"));
+        return complete(submit(req("GET", tmpl), handleList(Article.class, "results")));
     }
 
     public Iterable<Article> getArticlesFromAnyLabels(List<String> labels) {
@@ -1724,12 +1724,15 @@ public class Zendesk implements Closeable {
     }
 
     public Iterable<DynamicContentItem> getDynamicContentItems(Page page, Sorting sorting) {
-        return new PagedIterable<>(tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+        return complete(submit(
+                req("GET",
+                        tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                         .set("page", page.getPageNo())
                         .set("per_page", page.getPerPage())
                         .set("sort_by", sorting.getSortBy())
-                        .set("sort_order", sorting.getSortOrder().getQueryParameter()),
-                handleList(DynamicContentItem.class, "items"));
+                        .set("sort_order", sorting.getSortOrder().getQueryParameter())
+                ),
+                handleList(DynamicContentItem.class, "items")));
     }
 
     public DynamicContentItem getDynamicContentItem(long id) {
@@ -2083,13 +2086,13 @@ public class Zendesk implements Closeable {
     public Translation createArticleTranslation(Long articleId, Translation translation) {
         checkHasArticleId(articleId);
         return complete(submit(req("POST", tmpl("/help_center/articles/{id}/translations.json").set("id", articleId),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))), handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public Translation updateArticleTranslation(Long articleId, String locale, Translation translation) {
         checkHasId(translation);
         return complete(submit(req("PUT", tmpl("/help_center/articles/{id}/translations/{locale}.json").set("id", articleId).set("locale",locale),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))), handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public void deleteArticle(Article article) {
@@ -2139,14 +2142,16 @@ public class Zendesk implements Closeable {
     }
 
     public Iterable<Category> getCategories(String locale, Page page, Sorting sorting) {
-        return new PagedIterable<>(
+        return complete(submit(
+                req("GET",
                         tmpl("/help_center/{locale}/categories.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                                 .set("locale", locale)
                                 .set("page", page.getPageNo())
                                 .set("per_page", page.getPerPage())
                                 .set("sort_by", sorting.getSortBy())
-                                .set("sort_order", sorting.getSortOrder().getQueryParameter()),
-                handleList(Category.class, "categories"));
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
+                        ),
+                handleList(Category.class, "categories")));
     }
 
     public Category getCategory(long id) {
@@ -2188,13 +2193,13 @@ public class Zendesk implements Closeable {
     public Translation createCategoryTranslation(Long categoryId, Translation translation) {
         checkHasCategoryId(categoryId);
         return complete(submit(req("POST", tmpl("/help_center/categories/{id}/translations.json").set("id", categoryId),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))), handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public Translation updateCategoryTranslation(Long categoryId, String locale, Translation translation) {
         checkHasId(translation);
         return complete(submit(req("PUT", tmpl("/help_center/categories/{id}/translations/{locale}.json").set("id", categoryId).set("locale",locale),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))), handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public void deleteCategory(Category category) {
@@ -2216,27 +2221,31 @@ public class Zendesk implements Closeable {
     }
 
     public Iterable<Section> getSections(String locale, Page page, Sorting sorting) {
-        return new PagedIterable<>(
-                tmpl("/help_center/{locale}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
-                        .set("locale", locale)
-                        .set("page", page.getPageNo())
-                        .set("per_page", page.getPerPage())
-                        .set("sort_by", sorting.getSortBy())
-                        .set("sort_order", sorting.getSortOrder().getQueryParameter()),
-        handleList(Section.class, "sections"));
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("page", page.getPageNo())
+                                .set("per_page", page.getPerPage())
+                                .set("sort_by", sorting.getSortBy())
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
+                        ),
+        handleList(Section.class, "sections")));
     }
 
     public Iterable<Section> getSections(String locale, Category category, Page page, Sorting sorting) {
         checkHasId(category);
-        return new PagedIterable<>(
-                tmpl("/help_center/{locale}/categories/{categoryId}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
-                        .set("locale", locale)
-                        .set("categoryId", category.getId())
-                        .set("page", page.getPageNo())
-                        .set("per_page", page.getPerPage())
-                        .set("sort_by", sorting.getSortBy())
-                        .set("sort_order", sorting.getSortOrder().getQueryParameter()),
-        handleList(Section.class, "sections"));
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/categories/{categoryId}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("categoryId", category.getId())
+                                .set("page", page.getPageNo())
+                                .set("per_page", page.getPerPage())
+                                .set("sort_by", sorting.getSortBy())
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
+                         ),
+            handleList(Section.class, "sections")));
     }
 
     public Section getSection(long id) {
@@ -2275,13 +2284,13 @@ public class Zendesk implements Closeable {
     public Translation createSectionTranslation(Long sectionId, Translation translation) {
         checkHasSectionId(sectionId);
         return complete(submit(req("POST", tmpl("/help_center/sections/{id}/translations.json").set("id", sectionId),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))), handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public Translation updateSectionTranslation(Long sectionId, String locale, Translation translation) {
         checkHasId(translation);
         return complete(submit(req("PUT", tmpl("/help_center/sections/{id}/translations/{locale}.json").set("id", sectionId).set("locale",locale),
-                JSON, json(Collections.singletonMap("translation", translation))), handle(Translation.class, "translation")));
+                JSON, json(Collections.singletonMap("translation", translation))), handleWithExceptionIfNotFound(Translation.class, "translation")));
     }
 
     public void deleteSection(Section section) {
@@ -2482,20 +2491,42 @@ public class Zendesk implements Closeable {
                 return mapper.convertValue(mapper.readTree(response.getResponseBodyAsStream()).get(name), clazz);
             } else if (isRateLimitResponse(response)) {
                 throw new ZendeskResponseRateLimitException(response);
+            } else if (response.getStatusCode() == 404) {
+                throw new ZendeskEntityNotFoundException(response);
+            } else {
+                throw new ZendeskResponseException(response);
             }
+        }
+    }
+
+    private class BasicAsyncCompletionHandlerWithNullIfNotFound<T> extends BasicAsyncCompletionHandler<T> {
+        public BasicAsyncCompletionHandlerWithNullIfNotFound(Class clazz, String name, Class... typeParams) {
+            super(clazz, name, typeParams);
+        }
+
+        @Override
+        public T onCompleted(Response response) throws Exception {
+            logResponse(response);
+
             if (response.getStatusCode() == 404) {
                 return null;
+            } else {
+                return super.onCompleted(response);
             }
-            throw new ZendeskResponseException(response);
         }
     }
 
     protected <T> ZendeskAsyncCompletionHandler<T> handle(final Class<T> clazz, final String name, final Class... typeParams) {
-        return new BasicAsyncCompletionHandler<>(clazz, name, typeParams);
+        return new BasicAsyncCompletionHandlerWithNullIfNotFound<>(clazz, name, typeParams);
     }
 
+    private <T> ZendeskAsyncCompletionHandler<T> handleWithExceptionIfNotFound(final Class<T> clazz, final String name, final Class... typeParams) {
+        return new BasicAsyncCompletionHandler<T>(clazz, name, typeParams);
+    }
+
+
     protected <T> ZendeskAsyncCompletionHandler<JobStatus<T>> handleJobStatus(final Class<T> resultClass) {
-        return new BasicAsyncCompletionHandler<JobStatus<T>>(JobStatus.class, "job_status", resultClass) {
+        return new BasicAsyncCompletionHandlerWithNullIfNotFound<JobStatus<T>>(JobStatus.class, "job_status", resultClass) {
             @Override
             public JobStatus<T> onCompleted(Response response) throws Exception {
                 JobStatus<T> result = super.onCompleted(response);
