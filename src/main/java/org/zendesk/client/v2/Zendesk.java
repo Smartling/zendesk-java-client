@@ -97,7 +97,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 /**
  * @author stephenc
@@ -424,7 +423,7 @@ public class Zendesk implements Closeable {
                 .set("query", searchTerm).set("section", sectionId), handleList(Article.class, "results"));
     }
 
-    public Iterable<Article> getArticlesByQueryAndSection(String locale, String searchTerm, Section section, Category category, Page page) {
+    public Iterable<Article> getArticleFromSearch(String locale, String searchTerm, Section section, Category category, Page page) {
 
         TemplateUri tmpl = tmpl("/help_center/articles/search.json{?locale, query, category, section, page, per_page")
                 .set("locale", locale)
