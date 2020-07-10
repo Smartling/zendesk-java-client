@@ -12,7 +12,7 @@ public enum SortOrder {
 
     private final String queryParameter;
 
-    public SortOrder fromQueryParameter(String queryParameter) {
+    public static SortOrder fromQueryParameter(String queryParameter) {
         return Arrays.stream(SortOrder.values())
                 .filter(s -> s.getQueryParameter().equals(queryParameter))
                 .findFirst()
