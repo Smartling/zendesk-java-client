@@ -1,54 +1,33 @@
-node {
-    step([$class: 'GitHubSetCommitStatusBuilder'])
-
-    // Checkout code
-    stage 'Checkout'
-    checkout scm
-    def pom = readMavenPom()
-    def projectName = pom.name
-    def projectVersion = pom.version
-
-    // Build & test
-    stage 'Build'
-    try {
-        echo "Building ${projectName} - ${projectVersion}"
-        mvn "-Dmaven.test.failure.ignore clean verify"
-        step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
-        step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/*.xml'])
-        step([$class: 'FindBugsPublisher', pattern: '**/findbugsXml.xml'])
-        currentBuild.result = 'SUCCESS'
-    } catch (Exception err) {
-        currentBuild.result = 'FAILURE'
+// For Reference Only
+pipeline {
+    environment {
+        ZENDESK_JAVA_CLIENT_TEST_URL             = credentials('ZENDESK_JAVA_CLIENT_TEST_URL')
+        ZENDESK_JAVA_CLIENT_TEST_USERNAME        = credentials('ZENDESK_JAVA_CLIENT_TEST_USERNAME')
+        ZENDESK_JAVA_CLIENT_TEST_PASSWORD        = credentials('ZENDESK_JAVA_CLIENT_TEST_PASSWORD')
+        ZENDESK_JAVA_CLIENT_TEST_TOKEN           = credentials('ZENDESK_JAVA_CLIENT_TEST_TOKEN')
+        ZENDESK_JAVA_CLIENT_TEST_REQUESTER_EMAIL = credentials('ZENDESK_JAVA_CLIENT_TEST_REQUESTER.EMAIL')
+        ZENDESK_JAVA_CLIENT_TEST_REQUESTER_NAME  = credentials('ZENDESK_JAVA_CLIENT_TEST_REQUESTER.NAME')
     }
-
-    // Notifications
-    stage 'Notify'
-    step([$class: 'GitHubCommitNotifier', resultOnFailure: 'FAILURE'])
-    def color = 'GREEN'
-    if (!isOK()) {
-        color = 'RED'
+    agent {
+        label "standard"
     }
-    hipchatSend color: "${color}",
-        message: "${projectName} - ${projectVersion} @ ${env.BRANCH_NAME} <a href='${env.BUILD_URL}'>#${env.BUILD_NUMBER}</a> status: ${currentBuild.result}",
-        room: 'support-room'
-}
-
-// Utility functions
-
-def mvn(String goals) {
-    def mvnHome = tool "maven-3.3.9"
-    def javaHome = tool "oracle-8u74"
-
-    withEnv(["JAVA_HOME=${javaHome}", "PATH+MAVEN=${mvnHome}/bin"]) {
-        wrap([$class: 'ConfigFileBuildWrapper', managedFiles: [
-            [fileId: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1446135612420', targetLocation: "settings.xml", variable: '']
-        ]]) {
-            sh "mvn -s settings.xml -B ${goals}"
+    stages {
+        stage("Build") {
+            steps {
+                withSonarQubeEnv('sonarcloud.io') {
+                    withMaven(
+                            mavenOpts: '-Xmx512m -Djava.awt.headless=true'
+                    ) {
+                        sh "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent ${env.BRANCH_NAME == 'master' && readMavenPom().version.contains('-SNAPSHOT') ? 'deploy -DdeployAtEnd=true' : 'verify'} sonar:sonar -Dsonar.organization=cloudbees -Dsonar.branch.name=\"${env.BRANCH_NAME}\" -Dmaven.test.failure.ignore=true"
+                    }
+                }
+            }
         }
     }
-}
-
-@com.cloudbees.groovy.cps.NonCPS
-def isOK() {
-    return "SUCCESS".equals(currentBuild.result)
+    options {
+        // Keep 10 builds at a time
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        // Be sure that this build doesn't hang forever
+        timeout(time: 5, unit: 'MINUTES')
+    }
 }

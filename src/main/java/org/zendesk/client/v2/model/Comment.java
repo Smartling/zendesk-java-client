@@ -17,6 +17,7 @@ public class Comment implements Serializable {
 
     private Long id;
     private String body;
+    private String htmlBody;
     private Long authorId;
     private List<String> uploads;
     private List<Attachment> attachments;
@@ -41,6 +42,15 @@ public class Comment implements Serializable {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    @JsonProperty("html_body")
+    public String getHtmlBody() {
+        return htmlBody;
+    }
+
+    public void setHtmlBody(String htmlBody) {
+        this.htmlBody = htmlBody;
     }
 
     public List<String> getUploads() {
@@ -96,14 +106,12 @@ public class Comment implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Comment{");
-        sb.append("id=").append(id);
-        sb.append(", body='").append(body).append('\'');
-        sb.append(", authorId=").append(authorId);
-        sb.append(", attachments=").append(attachments);
-        sb.append(", createdAt=").append(createdAt);
-        sb.append(", uploads=").append(uploads);
-        sb.append('}');
-        return sb.toString();
+        return "Comment{" + "id=" + id +
+                ", body='" + body + '\'' +
+                ", authorId=" + authorId +
+                ", attachments=" + attachments +
+                ", createdAt=" + createdAt +
+                ", uploads=" + uploads +
+                '}';
     }
 }

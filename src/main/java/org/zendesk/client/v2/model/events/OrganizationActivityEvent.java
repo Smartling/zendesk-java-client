@@ -1,8 +1,8 @@
 package org.zendesk.client.v2.model.events;
 
-import java.util.List;
-
 import org.zendesk.client.v2.model.Via;
+
+import java.util.List;
 
 /**
  * A notification was sent to the organization subscribers
@@ -54,13 +54,11 @@ public class OrganizationActivityEvent extends Event {
 
   @Override
   public String toString() {
-      final StringBuilder sb = new StringBuilder();
-      sb.append("OrganizationActivityEvent");
-      sb.append("{subject=").append(subject);
-      sb.append(", body=").append(body);
-      sb.append(", recipients=").append(recipients);
-      sb.append(", via=").append(via);
-      sb.append('}');
-      return sb.toString();
+      return "OrganizationActivityEvent" +
+              "{subject=" + subject +
+              ", body=" + body +
+              ", recipients=" + recipients +
+              ", via=" + via +
+              '}';
   }
 }

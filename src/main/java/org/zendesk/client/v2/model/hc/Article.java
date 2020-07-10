@@ -1,5 +1,7 @@
 package org.zendesk.client.v2.model.hc;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.zendesk.client.v2.model.SearchResultEntity;
 
@@ -47,6 +49,10 @@ public class Article implements SearchResultEntity {
      */
     private Boolean outdated;
 
+    /** Locales in which the article was marked as outdated */
+    @JsonProperty("outdated_locales")
+    private List<String> outdatedLocales;
+
     /** An array of label names associated with this article. By default no label names are used. Only available on certain plans */
     @JsonProperty("label_names")
     private List<String> labelNames;
@@ -72,6 +78,16 @@ public class Article implements SearchResultEntity {
     @JsonProperty("section_id")
     private Long sectionId;
 
+    /** The id of the user segment which defines who can see this article. Set to null to make it accessible to everyone. */
+    @JsonInclude(Include.ALWAYS)
+    @JsonProperty(value = "user_segment_id", defaultValue = "null")
+    private Long userSegmentId;
+
+    /** The id of the permission group which defines who can edit and publish this article. */
+    @JsonInclude(Include.ALWAYS)
+    @JsonProperty(value = "permission_group_id", defaultValue = "null")
+    private Long permissionGroupId;
+
     /** The time the article was created */
     @JsonProperty("created_at")
     private Date createdAt;
@@ -79,6 +95,10 @@ public class Article implements SearchResultEntity {
     /** The time the article was last updated */
     @JsonProperty("updated_at")
     private Date updatedAt;
+
+    /** The time the article was last edited in its displayed locale */
+    @JsonProperty("edited_at")
+    private Date editedAt;
 
     public Long getId() {
         return id;
@@ -170,6 +190,14 @@ public class Article implements SearchResultEntity {
         this.outdated = outdated;
     }
 
+    public List<String> getOutdatedLocales() {
+        return outdatedLocales;
+    }
+
+    public void setOutdatedLocales(List<String> outdatedLocales) {
+        this.outdatedLocales = outdatedLocales;
+    }
+
     public List<String> getLabelNames() {
         return labelNames;
     }
@@ -226,6 +254,22 @@ public class Article implements SearchResultEntity {
         this.sectionId = sectionId;
     }
 
+    public Long getUserSegmentId() {
+        return userSegmentId;
+    }
+
+    public void setUserSegmentId(Long userSegmentId) {
+        this.userSegmentId = userSegmentId;
+    }
+
+    public Long getPermissionGroupId() {
+        return permissionGroupId;
+    }
+
+    public void setPermissionGroupId(Long permissionGroupId) {
+        this.permissionGroupId = permissionGroupId;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -242,6 +286,14 @@ public class Article implements SearchResultEntity {
         this.updatedAt = updatedAt;
     }
 
+    public Date getEditedAt() {
+        return editedAt;
+    }
+
+    public void setEditedAt(Date editedAt) {
+        this.editedAt = editedAt;
+    }
+
     @Override
     public String toString() {
         return "Article{" +
@@ -255,6 +307,7 @@ public class Article implements SearchResultEntity {
                 ", authorId=" + authorId +
                 ", commentsDisabled=" + commentsDisabled +
                 ", outdated=" + outdated +
+                ", outdatedLocales=" + outdatedLocales +
                 ", labelNames=" + labelNames +
                 ", draft=" + draft +
                 ", promoted=" + promoted +
@@ -262,8 +315,11 @@ public class Article implements SearchResultEntity {
                 ", voteSum=" + voteSum +
                 ", voteCount=" + voteCount +
                 ", sectionId=" + sectionId +
+                ", userSegmentId=" + userSegmentId +
+                ", permissionGroupId=" + permissionGroupId +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
+                ", editedAt=" + editedAt +
                 '}';
     }
 }

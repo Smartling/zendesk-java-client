@@ -1,9 +1,11 @@
 package org.zendesk.client.v2.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.zendesk.client.v2.model.Ticket.Requester;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author stephenc
@@ -22,9 +24,14 @@ public class Request implements Serializable {
     protected Long requesterId;
     protected Long organizationId;
     protected Via via;
+    protected Long viaFollowupSourceId;
     protected Date createdAt;
     protected Date updatedAt;
     protected Comment comment;
+    protected Boolean solved;
+    protected Priority priority;
+    protected List<CustomFieldValue> customFields;
+    protected Type type;
 
     @JsonProperty("created_at")
     public Date getCreatedAt() {
@@ -114,11 +121,67 @@ public class Request implements Serializable {
         this.via = via;
     }
 
+    @JsonProperty("via_followup_source_id")
+    public Long getViaFollowupSourceId() {
+        return viaFollowupSourceId;
+    }
+
+    public void setViaFollowupSourceId(Long viaFollowupSourceId) {
+        this.viaFollowupSourceId = viaFollowupSourceId;
+    }
+
     public Comment getComment() {
         return comment;
     }
 
     public void setComment(Comment comment) {
         this.comment = comment;
+    }
+
+    @JsonProperty("solved")
+    public Boolean getSolved() {
+        return solved;
+    }
+
+    public void setSolved(Boolean solved) {
+        this.solved = solved;
+    }
+
+    @JsonProperty("priority")
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+
+    @JsonProperty("custom_fields")
+    public List<CustomFieldValue> getCustomFields() {
+        return customFields;
+    }
+
+    public void setCustomFields(List<CustomFieldValue> customFields) {
+        this.customFields = customFields;
+    }
+
+    public Requester getRequester() {
+        return requester;
+    }
+
+    public void setRequester(Requester requester) {
+        this.requester = requester;
+        if (requester != null) {
+            this.requesterId = null;
+        }
+    }
+
+    @JsonProperty("type")
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }

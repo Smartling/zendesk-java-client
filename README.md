@@ -3,6 +3,15 @@ Zendesk Java Client
 
 This is a [Zendesk][zd] client implementation written in Java using AsyncHttpClient and Jackson.
 
+[ ![Codeship Status for cloudbees/zendesk-java-client](https://app.codeship.com/projects/082070f0-835b-0136-c886-725adb0ce8d4/status?branch=master)](https://app.codeship.com/projects/302087) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.cloudbees.thirdparty/zendesk-java-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.cloudbees.thirdparty/zendesk-java-client/)
+
+
+[![Quality Gate](https://sonarcloud.io/api/project_badges/quality_gate?project=com.cloudbees.thirdparty%3Azendesk-java-client)](https://sonarcloud.io/dashboard?id=com.cloudbees.thirdparty%3Azendesk-java-client)
+
+
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.cloudbees.thirdparty%3Azendesk-java-client&metric=coverage)](https://sonarcloud.io/dashboard?id=com.cloudbees.thirdparty%3Azendesk-java-client)
+[![Lines](https://sonarcloud.io/api/project_badges/measure?project=com.cloudbees.thirdparty%3Azendesk-java-client&metric=ncloc)](https://sonarcloud.io/dashboard?id=com.cloudbees.thirdparty%3Azendesk-java-client)
+
 Using the API
 -------------
 
@@ -27,6 +36,11 @@ all records have been fetched, so e.g.
 will iterate through *all* tickets. Most likely you will want to implement your own cut-off process to stop iterating
 when you have got enough data.
 
+Mailing lists
+-------------
+
+* [Users list](https://groups.google.com/forum/#!forum/zendesk-java-client-users)
+
 Status
 ------
 
@@ -36,16 +50,18 @@ Here is the status of the various API components:
 * [Ticket Audits](http://developer.zendesk.com/documentation/rest_api/ticket_audits.html) ✓
 * [Incremental Export](https://developer.zendesk.com/rest_api/docs/core/incremental_export) - Partial (tickets, users, organizations only) 
 * [Ticket Fields](http://developer.zendesk.com/documentation/rest_api/ticket_fields.html) ✓
-* [Ticket Import](http://developer.zendesk.com/documentation/rest_api/ticket_import.html)
+* [Ticket Import](http://developer.zendesk.com/documentation/rest_api/ticket_import.html) ✓
 * [Ticket Metrics](http://developer.zendesk.com/documentation/rest_api/ticket_metrics.html) ✓
 * [Ticket Forms](http://developer.zendesk.com/documentation/rest_api/ticket_forms.html) *getTicketForm() and getTicketForms()*
 * [Views](http://developer.zendesk.com/documentation/rest_api/views.html)
 * [Users](http://developer.zendesk.com/documentation/rest_api/users.html) ✓
+    * [User Related Information](https://developer.zendesk.com/rest_api/docs/core/users#user-related-information) ✓
+* [User Fields](https://developer.zendesk.com/rest_api/docs/core/user_fields.html) - Partial - List User Fields (`getUserField()`)
 * [Requests](http://developer.zendesk.com/documentation/rest_api/requests.html) ✓
 * [User Identities](http://developer.zendesk.com/documentation/rest_api/user_identities.html) ✓
 * [Groups](http://developer.zendesk.com/documentation/rest_api/groups.html) ✓
 * [Group Membership](http://developer.zendesk.com/documentation/rest_api/group_memberships.html) ✓
-* [Custom Agent Roles](http://developer.zendesk.com/documentation/rest_api/custom_roles.html)
+* [Custom Agent Roles](http://developer.zendesk.com/documentation/rest_api/custom_roles.html) ✓
 * [Organizations](http://developer.zendesk.com/documentation/rest_api/organizations.html) ✓ *except for related info*
 * [Search](http://developer.zendesk.com/documentation/rest_api/search.html) ✓ *except for topics and sort ordering*
 * [Tags](http://developer.zendesk.com/documentation/rest_api/tags.html)
@@ -58,7 +74,10 @@ Here is the status of the various API components:
 * [Help Center Categories](https://developer.zendesk.com/rest_api/docs/help_center/categories) ✓
 * [Help Center Sections](https://developer.zendesk.com/rest_api/docs/help_center/sections) ✓
 * [Help Center Articles](https://developer.zendesk.com/rest_api/docs/help_center/articles) ✓
-* [Help Center Translations](https://developer.zendesk.com/rest_api/docs/help_center/translations) - Partial (List Translations, Update Translation)
+* [Help Center Translations](https://developer.zendesk.com/rest_api/docs/help_center/translations) - Partial (List Translations, Update Translation, Delete Translation)
+* [Help Center Subscriptions](https://developer.zendesk.com/rest_api/docs/help_center/subscriptions)
+* [Help Center Management Permission Groups](https://developer.zendesk.com/rest_api/docs/help_center/permission_groups)
+* [Help Center User Segments](https://developer.zendesk.com/rest_api/docs/help_center/user_segments)
 * [Topic Votes](http://developer.zendesk.com/documentation/rest_api/topic_votes.html)
 * [Account Settings](http://developer.zendesk.com/documentation/rest_api/account_settings.html)
 * [Activity Stream](http://developer.zendesk.com/documentation/rest_api/activity_stream.html)
@@ -77,14 +96,6 @@ Here is the status of the various API components:
 History
 -------
 
-* 0.0.x - Initial release series
-
-* 0.1.x - Switched from `Integer` as the id type to `Long` due to reports of overflow
-
-* 0.2.x - At request of [Zendesk][zd], renamed `ZenDesk` to `Zendesk`
-
-* 0.3.x - Fixed infinite loop with PagedIterable, updated async-http-client dependency to 1.9.x.
-
-* 0.4.x - Few API breakage (in particular changed userId to Long in Identity), updated async-http-client dependency to latest.
+* See [releases](https://github.com/cloudbees/zendesk-java-client/releases)
 
   [zd]: http://zendesk.com

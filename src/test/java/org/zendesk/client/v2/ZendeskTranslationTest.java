@@ -1,17 +1,12 @@
 package org.zendesk.client.v2;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Collections;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.asynchttpclient.AsyncCompletionHandler;
+import org.asynchttpclient.AsyncHandler;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.ListenableFuture;
+import org.asynchttpclient.Request;
+import org.asynchttpclient.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,14 +14,20 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.zendesk.client.v2.model.hc.Translation;
+import org.zendesk.client.v2.model.hc.TranslationSourceType;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.ListenableFuture;
-import com.ning.http.client.Request;
-import com.ning.http.client.Response;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Collections;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.zendesk.client.v2.model.hc.TranslationSourceType.ARTICLE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ZendeskTranslationTest
@@ -58,11 +59,12 @@ public class ZendeskTranslationTest
     {
         long id = 18;
         String locale = "zo";
-        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations/" + locale + ".json";
-        Translation responseTranslation = getTranslation(locale, id);
-        setupHttpCall("GET", url, null, toContentResponse(200, responseTranslation));
+        String url = DEFAULT_URL + "/api/v2/help_center/" + ARTICLE.getUrlPath() + "/" + id + "/translations/" + locale + ".json";
+        Translation responseTranslation = getTranslation(locale, ARTICLE, id);
+        Response response = toContentResponse(200, responseTranslation);
+        setupHttpCall("GET", url, null, response);
 
-        Translation result = instance.getArticleTranslation(18L, "zo");
+        Translation result = instance.getArticleTranslation( 18L, "zo");
 
         assertNotNull(result);
         assertEquals(responseTranslation.getId(), result.getId());
@@ -78,8 +80,9 @@ public class ZendeskTranslationTest
     {
         long id = 18;
         String locale = "zo";
-        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations/" + locale + ".json";
-        setupHttpCall("GET", url, null, toContentResponse(200, null));
+        String url = DEFAULT_URL + "/api/v2/help_center/" + ARTICLE.getUrlPath() + "/" + id + "/translations/" + locale + ".json";
+        Response response = toContentResponse(200, null);
+        setupHttpCall("GET", url, null, response);
 
         Translation result = instance.getArticleTranslation(18L, "zo");
 
@@ -90,9 +93,11 @@ public class ZendeskTranslationTest
     public void testCreateTranslation() throws Exception
     {
         long id = 18;
-        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations.json";
-        Translation translation = getTranslation("zo", id);
-        setupHttpCall("POST", url, serialize(translation), toContentResponse(200, translation));
+        String locale = "zo";
+        String url = DEFAULT_URL + "/api/v2/help_center/" + ARTICLE.getUrlPath() + "/" + id + "/translations.json";
+        Translation translation = getTranslation(locale, ARTICLE, id);
+        Response response = toContentResponse(200, translation);
+        setupHttpCall("POST", url, serialize(translation), response);
 
         Translation result = instance.createArticleTranslation(id, translation);
 
@@ -110,9 +115,10 @@ public class ZendeskTranslationTest
     {
         long id = 18;
         String locale = "zo";
-        String url = DEFAULT_URL + "/api/v2/help_center/articles/" + id + "/translations/" + locale + ".json";
-        Translation translation = getTranslation(locale, id);
-        setupHttpCall("PUT", url, serialize(translation), toContentResponse(200, translation));
+        String url = DEFAULT_URL + "/api/v2/help_center/" + ARTICLE.getUrlPath() + "/" + id + "/translations/" + locale + ".json";
+        Translation translation = getTranslation(locale, ARTICLE, id);
+        Response response = toContentResponse(200, translation);
+        setupHttpCall("PUT", url, serialize(translation), response);
 
         Translation result = instance.updateArticleTranslation(id, locale, translation);
 
@@ -132,7 +138,8 @@ public class ZendeskTranslationTest
         Translation translation = new Translation();
         translation.setId(id);
         String url = DEFAULT_URL + "/api/v2/help_center/translations/" + id + ".json";
-        setupHttpCall("DELETE", url, null, toContentResponse(200, null));
+        Response response = toContentResponse(200, null);
+        setupHttpCall("DELETE", url, null, response);
 
         instance.deleteTranslation(translation);
     }
@@ -154,9 +161,9 @@ public class ZendeskTranslationTest
     private Response toContentResponse(Integer responseCode, Translation translation) throws IOException
     {
         Response response = mock(Response.class);
+
         when(response.getStatusCode()).thenReturn(responseCode);
         when(response.getResponseBodyAsStream()).thenReturn(new ByteArrayInputStream(serialize(translation)));
-
         return response;
     }
 
@@ -171,15 +178,15 @@ public class ZendeskTranslationTest
         return translationAsJsonBytes;
     }
 
-    private Translation getTranslation(String locale, Long sourceId)
+    private Translation getTranslation(String locale, TranslationSourceType sourceType, Long sourceId)
     {
         Translation translation = new Translation();
-        translation.setId(442L);
+        translation.setId(1L);
         translation.setLocale(locale);
         translation.setSourceId(sourceId);
+        translation.setSourceType(sourceType.getSourceType());
         translation.setTitle(DEFAULT_TITLE);
         translation.setBody(DEFAULT_BODY);
-
         return translation;
     }
 }
