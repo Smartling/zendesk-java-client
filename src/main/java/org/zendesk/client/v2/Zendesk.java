@@ -91,7 +91,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -1803,7 +1802,7 @@ public class Zendesk implements Closeable {
      * @return
      */
     public List<SupportCenterLocale> getEnabledSupportCenterLocales() {
-        return (List)complete(this.submit(this.req("GET", this.cnst("/locales.json")), this.handleList(Locale.class, "locales")));
+        return complete(this.submit(this.req("GET", this.cnst("/locales.json")), this.handleList(SupportCenterLocale.class, "locales")));
     }
 
     /**
@@ -1811,7 +1810,7 @@ public class Zendesk implements Closeable {
      * @return
      */
     public List<SupportCenterLocale> getAvailableSupportCenterLocales() {
-        return (List)complete(this.submit(this.req("GET", this.cnst("/locales/public.json")), this.handleList(Locale.class, "locales")));
+        return complete(this.submit(this.req("GET", this.cnst("/locales/public.json")), this.handleList(SupportCenterLocale.class, "locales")));
     }
 
     //////////////////////////////////////////////////////////////////////
