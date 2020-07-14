@@ -2,6 +2,7 @@ package org.zendesk.client.v2;
 
 import org.hamcrest.core.IsCollectionContaining;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -18,10 +19,13 @@ import org.zendesk.client.v2.model.Group;
 import org.zendesk.client.v2.model.Identity;
 import org.zendesk.client.v2.model.JobStatus;
 import org.zendesk.client.v2.model.Organization;
+import org.zendesk.client.v2.model.Page;
 import org.zendesk.client.v2.model.Priority;
 import org.zendesk.client.v2.model.Request;
 import org.zendesk.client.v2.model.SortOrder;
+import org.zendesk.client.v2.model.Sorting;
 import org.zendesk.client.v2.model.Status;
+import org.zendesk.client.v2.model.SupportCenterLocale;
 import org.zendesk.client.v2.model.SuspendedTicket;
 import org.zendesk.client.v2.model.Ticket;
 import org.zendesk.client.v2.model.TicketForm;
@@ -30,6 +34,7 @@ import org.zendesk.client.v2.model.dynamic.DynamicContentItem;
 import org.zendesk.client.v2.model.dynamic.DynamicContentItemVariant;
 import org.zendesk.client.v2.model.events.Event;
 import org.zendesk.client.v2.model.hc.Article;
+import org.zendesk.client.v2.model.hc.ArticleAttachments;
 import org.zendesk.client.v2.model.hc.Category;
 import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.hc.Subscription;
@@ -45,6 +50,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -60,11 +66,17 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNoException;
+import static org.junit.Assume.assumeNotNull;
 import static org.junit.Assume.assumeThat;
+import static org.junit.Assume.assumeTrue;
+import static org.zendesk.client.v2.model.SortOrder.ASCENDING;
+import static org.zendesk.client.v2.model.SortOrder.DESCENDING;
 
 /**
  * @author stephenc
@@ -79,6 +91,12 @@ public class RealSmokeTest {
     private static final long PUBLIC_FORM_ID = 360000434032L;
 
     private static Properties config;
+
+    private Long sectionId;
+    private Long categoryId;
+    private Long dynamicContentItemId;
+    private Long variantId;
+    private String queryString;
 
     private Zendesk instance;
 
@@ -103,6 +121,22 @@ public class RealSmokeTest {
         assumeThat("We have a username", config.getProperty("username"), notNullValue());
         assumeThat("We have a token or password", config.getProperty("token") != null || config.getProperty("password") != null, is(
                 true));
+    }
+
+    @Before
+    public void init() throws Exception {
+        sectionId = parseLongOrNull(config.getProperty("sectionId"));
+        categoryId = parseLongOrNull(config.getProperty("categoryId"));
+        dynamicContentItemId = parseLongOrNull(config.getProperty("dynamicContentItemId"));
+        variantId = parseLongOrNull(config.getProperty("variantId"));
+        queryString = config.getProperty("queryString");
+
+        createClientWithTokenOrPassword();
+    }
+
+    private static Long parseLongOrNull(final String string)
+    {
+        return string != null ? Long.valueOf(string) : null;
     }
 
     @After
@@ -153,6 +187,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs specfic ticket form instance")
     public void getTicketForm() throws Exception {
         createClientWithTokenOrPassword();
         TicketForm ticketForm = instance.getTicketForm(PUBLIC_FORM_ID);
@@ -161,6 +196,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore
     public void getTicketForms() throws Exception {
         createClientWithTokenOrPassword();
         Iterable<TicketForm> ticketForms = instance.getTicketForms();
@@ -171,6 +207,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs specfic ticket form instance")
     public void getTicketFieldsOnForm() throws Exception {
         createClientWithTokenOrPassword();
         TicketForm ticketForm = instance.getTicketForm(PUBLIC_FORM_ID);
@@ -197,6 +234,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs test data setup correctly")
     public void getTicketsPagesRequests() throws Exception {
         createClientWithTokenOrPassword();
         int count = 0;
@@ -210,6 +248,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Needs test data setup correctly")
     public void getRecentTickets() throws Exception {
         createClientWithTokenOrPassword();
         int count = 0;
@@ -224,6 +263,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore
     public void getTicketsById() throws Exception {
         createClientWithTokenOrPassword();
         long count = 24;
@@ -303,6 +343,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void createDeleteTicket() throws Exception {
         createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
@@ -333,6 +374,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void createPermanentlyDeleteTicket() throws Exception {
         createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
@@ -391,6 +433,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void createSolveTickets() throws Exception {
         createClientWithTokenOrPassword();
         assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
@@ -419,6 +462,7 @@ public class RealSmokeTest {
     }
 
     @Test
+    @Ignore("Don't spam zendesk")
     public void testUpdateTickets() throws Exception {
         createClientWithTokenOrPassword();
         Ticket t = new Ticket(
@@ -926,15 +970,23 @@ public class RealSmokeTest {
                 break; // Do not overwhelm the getArticles API
             }
             for (Translation t : instance.getArticleTranslations(art.getId())) {
-                assertNotNull(t.getId());
-                assertNotNull(t.getTitle());
-                // body is not mandatory <https://developer.zendesk.com/rest_api/docs/help_center/translations.html>
-                //assertNotNull(t.getBody());
+                assertTranslationValid(t);
                 if (++translationCount > 3) {
                     return;
                 }
             }
         }
+    }
+
+    @Test
+    public void getArticleTranslation() throws Exception
+    {
+        createClientWithTokenOrPassword();
+        Article article = getFirstIfExist(instance.getArticles());
+
+        Translation translation = instance.getArticleTranslation(article.getId(), article.getSourceLocale());
+
+        assertTranslationValid(translation);
     }
 
     @Test
@@ -948,15 +1000,23 @@ public class RealSmokeTest {
                 break;
             }
             for (Translation t : instance.getSectionTranslations(sect.getId())) {
-                assertNotNull(t.getId());
-                assertNotNull(t.getTitle());
-                // body is not mandatory <https://developer.zendesk.com/rest_api/docs/help_center/translations.html>
-                //assertNotNull(t.getBody());
+                assertTranslationValid(t);
                 if (++translationCount > 3) {
                     return;
                 }
             }
         }
+    }
+
+    @Test
+    public void getSectionTranslation() throws Exception
+    {
+        createClientWithTokenOrPassword();
+        Section section = getFirstIfExist(instance.getSections());
+
+        Translation translation = instance.getSectionTranslation(section.getSourceLocale(), section.getId());
+
+        assertTranslationValid(translation);
     }
 
     @Test
@@ -970,15 +1030,23 @@ public class RealSmokeTest {
                 break;
             }
             for (Translation t: instance.getCategoryTranslations(cat.getId())) {
-                assertNotNull(t.getId());
-                assertNotNull(t.getTitle());
-                // body is not mandatory <https://developer.zendesk.com/rest_api/docs/help_center/translations.html>
-                //assertNotNull(t.getBody());
+                assertTranslationValid(t);
                 if (++translationCount > 3) {
                     return;
                 }
             }
         }
+    }
+
+    @Test
+    public void getCategoryTranslation() throws Exception
+    {
+        createClientWithTokenOrPassword();
+        Category category = getFirstIfExist(instance.getCategories());
+
+        Translation translation = instance.getCategoryTranslation(category.getId(), category.getSourceLocale());
+
+        assertTranslationValid(translation);
     }
 
     @Test
@@ -1189,6 +1257,54 @@ public class RealSmokeTest {
     }
 
     @Test
+    public void getDynamicContentItemsPaged() throws Exception {
+        createClientWithTokenOrPassword();
+
+        Iterable<DynamicContentItem> items = (instance.getDynamicContentItems(new Page(1, 5), new Sorting("created_at", SortOrder.DESCENDING)));
+
+        int count = 0;
+        DynamicContentItem previous = null;
+        for (DynamicContentItem item : items) {
+            if (previous != null)
+            {
+                assertTrue(previous.getCreatedAt().after(item.getCreatedAt()));
+            }
+            previous = item;
+
+            count++;
+        }
+        assertEquals(5, count);
+    }
+
+    @Test
+    public void getEnabledSupportCenterLocales() throws Exception
+    {
+        createClientWithTokenOrPassword();
+        int count = 0;
+        for (SupportCenterLocale locale : instance.getEnabledSupportCenterLocales()) {
+            assertThat(locale.getName(), notNullValue());
+            assertThat(locale.getId(), notNullValue());
+            if (++count > 10) {
+                break;
+            }
+        }
+    }
+
+    @Test
+    public void getAvailableSupportCenterLocales() throws Exception
+    {
+        createClientWithTokenOrPassword();
+        int count = 0;
+        for (SupportCenterLocale locale : instance.getAvailableSupportCenterLocales()) {
+            assertThat(locale.getName(), notNullValue());
+            assertThat(locale.getId(), notNullValue());
+            if (++count > 10) {
+                break;
+            }
+        }
+    }
+
+    @Test
     public void getTicketCommentsShouldBeAscending() throws Exception {
         createClientWithTokenOrPassword();
 
@@ -1236,5 +1352,347 @@ public class RealSmokeTest {
                 instance.deleteTicket(ticket.getId());
             }
         }
+    }
+
+    @Test
+    public void shouldReturnArticlesForSingleLocale() throws Exception {
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("updated_at", ASCENDING));
+
+        for (Article article : articlesForSpecificLocale) {
+            assertTrue(article.getLocale().equals("en-us"));
+        }
+    }
+
+    @Test
+    public void sizeShouldShouldBeNotMoreThanPerPageSize() throws Exception {
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("updated_at", ASCENDING));
+
+        List<Article> articleList = getList(articlesForSpecificLocale);
+        assertTrue(articleList.size() <= 20);
+    }
+
+    @Test
+    public void shouldBeSortedByTitleInAsc() throws Exception {
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("title", ASCENDING));
+
+        String previous = null;
+
+        for (Article article : articlesForSpecificLocale) {
+            if (previous == null) {
+                previous = article.getTitle();
+            } else {
+                String current = article.getTitle();
+
+                assertTrue(current.compareTo(previous) >= 0);
+
+                previous = current;
+            }
+
+        }
+    }
+
+    @Test
+    public void shouldBeSortedByUpdatedAtInAsc() throws Exception {
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("updated_at", ASCENDING));
+
+        Date previous = null;
+
+        for (Article article : articlesForSpecificLocale) {
+            if (previous == null) {
+                previous = article.getUpdatedAt();
+            } else {
+                Date current = article.getUpdatedAt();
+
+                assertTrue(current.after(previous) || current.equals(previous));
+
+                previous = current;
+            }
+
+        }
+    }
+
+    @Test
+    public void shouldBeSortedByTitleInDesc() throws Exception {
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("title", DESCENDING));
+
+        String previous = null;
+
+        for (Article article : articlesForSpecificLocale) {
+            if (previous == null) {
+                previous = article.getTitle();
+            } else {
+                String current = article.getTitle();
+
+                assertTrue(current.compareTo(previous) <= 0);
+
+                previous = current;
+            }
+
+        }
+    }
+
+    @Test
+    public void shouldSearchArticleByCategory() throws Exception {
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", null, null, category(categoryId), new Page(1, 10));
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), result.size());
+    }
+
+    @Test
+    public void shouldSearchArticleBySection() throws Exception {
+        assumeNotNull("Section ID is required to run this test", sectionId);
+
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", "*", section(sectionId), null, new Page(1, 10));
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
+    }
+
+    @Test
+    public void shouldSearchArticleByQuery() throws Exception {
+        assumeNotNull("Search query is required to run this test", queryString);
+
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, null, null, new Page(1, 10));
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query")), result.size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionIfQueryNotProvided() throws Exception {
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", null, null, null, new Page(1, 10));
+    }
+
+    @Test
+    public void shouldSearchArticleByQueryInOneCategory() throws Exception {
+        assumeNotNull("Search query is required to run this test", queryString);
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, null, category(categoryId), new Page(1, 10));
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.category")), result.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentCategoryId() throws Exception {
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticleFromSearch("en-us", null, null, category(0L), new Page(1, 10));
+
+        assertTrue(getList(articlesByQueryAndCategory).isEmpty());
+    }
+
+    @Test
+    public void shouldSearchArticleByQueryInOneSection() throws Exception {
+        assumeNotNull("Search query is required to run this test", queryString);
+        assumeNotNull("Section ID is required to run this test", sectionId);
+
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, section(sectionId), null, new Page(1, 10));
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.section")), result.size());
+    }
+
+    @Test
+    public void shouldReturnSectionsByLocaleAndCategory() throws Exception {
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
+        Iterable<Section> sectionsByCategory = instance.getSections("en-us", category(categoryId), new Page(1, 10), new Sorting("updated_at", DESCENDING));
+
+        List<Section> result = getList(sectionsByCategory);
+        assertEquals(Integer.parseInt(config.getProperty("expected.sections.by.category")), result.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentSectionId() throws Exception {
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticleFromSearch("en-us",  null, section(0L), null, new Page(1, 10));
+
+        assertTrue(getList(articlesByQueryAndCategory).isEmpty());
+    }
+
+    @Test
+    public void shouldGetArticleByLocaleAndId() throws Exception
+    {
+        Article existingArticle = getRandomArticle();
+
+        Article loadedArticle = instance.getArticle("en-us", existingArticle.getId().intValue());
+
+        assertEquals(loadedArticle.getId(), existingArticle.getId());
+    }
+
+    @Test
+    public void shouldGetCategoryByLocaleAndId() throws Exception
+    {
+        Category existingCategory = getRandomCategory();
+
+        Category loadedCategory = instance.getCategory("en-us", existingCategory.getId().intValue());
+
+        assertEquals(loadedCategory.getId(), existingCategory.getId());
+    }
+
+    @Test
+    public void shouldGetSectionByLocaleAndId() throws Exception
+    {
+        Section existingSection = getRandomSection();
+
+        Section loadedCategory = instance.getSection("en-us",existingSection.getId().intValue());
+
+        assertEquals(loadedCategory.getId(), existingSection.getId());
+    }
+
+    @Test
+    public void shouldReturnNotEmptyVariantsCollection() throws Exception
+    {
+        assumeNotNull("DynamicContentItemId ID is required to run this test", dynamicContentItemId);
+
+        Iterable<DynamicContentItemVariant> variants = instance.getDynamicContentItemVariants(dynamicContentItemId);
+        assertFalse(getList(variants).isEmpty());
+    }
+
+    @Test
+    public void shouldReturnVariantById() throws Exception {
+        assumeNotNull("DynamicContentItemId is required to run this test", dynamicContentItemId);
+        assumeNotNull("variantId is required to run this test", variantId);
+
+        DynamicContentItemVariant variantById = instance.getDynamicContentItemVariant(dynamicContentItemId, variantId);
+
+        assertEquals(variantId, variantById.getId());
+    }
+
+    @Test
+    public void shouldCreateVariant() throws Exception {
+        assumeNotNull("DynamicContentItemId ID is required to run this test", dynamicContentItemId);
+
+        Iterable<DynamicContentItemVariant> variants = instance.getDynamicContentItemVariants(dynamicContentItemId);
+        int initialSize = getList(variants).size();
+
+        instance.createDynamicContentItemVariant(dynamicContentItemId, getVariant(null, 2L, "Spanish variant"));
+
+        Iterable<DynamicContentItemVariant> resultVariants = instance.getDynamicContentItemVariants(dynamicContentItemId);
+        assertEquals(initialSize + 1, getList(resultVariants).size());
+    }
+
+    @Test
+    public void createdVariantShouldContainAppropriateFields() throws Exception{
+        assumeNotNull("DynamicContentItemId ID is required to run this test", dynamicContentItemId);
+
+        DynamicContentItemVariant resultVariant = instance.createDynamicContentItemVariant(dynamicContentItemId, getVariant(null, 1365L, "French variant"));
+
+        assertTrue(resultVariant.getId()!=null);
+        assertEquals(new Long(1365), resultVariant.getLocaleId());
+        assertEquals("French variant", resultVariant.getContent());
+    }
+
+    @Test
+    public void shouldUpdateVariant() throws Exception{
+        assumeNotNull("dynamicContentItemId is required to run this test", dynamicContentItemId);
+        assumeNotNull("variantId is required to run this test", variantId);
+
+        DynamicContentItemVariant resultVariant = instance.updateDynamicContentItemVariant(dynamicContentItemId, getVariant(variantId, 1365L, "French variant updated"));
+
+        DynamicContentItemVariant variantById = instance.getDynamicContentItemVariant(dynamicContentItemId, resultVariant.getId());
+
+        assertEquals("French variant updated", variantById.getContent());
+    }
+
+    @Test
+    public void shouldReturnNotEmptyDynamicContentCollection() throws Exception
+    {
+        Iterable<DynamicContentItem> dynamicContent = instance.getDynamicContentItems(new Page(1, 10), new Sorting("updated_at", ASCENDING));
+        assertFalse(getList(dynamicContent).isEmpty());
+    }
+
+    @Test
+    public void shouldReturnArticleAttachment() throws Exception
+    {
+        Article existingArticle = getRandomArticle();
+
+        List<ArticleAttachments> attachments = instance.getAttachmentsFromArticle("en-us", existingArticle.getId());
+
+        assertNotNull(attachments);
+    }
+
+    private Article getRandomArticle()
+    {
+        try {
+            return getFirstIfExist(instance.getArticles());
+        } catch (ZendeskException e) {
+            assumeNoException("Need to be able to fetch articles to run this test", e);
+            throw new IllegalStateException("Not possible here");
+        }
+    }
+
+    private Category getRandomCategory()
+    {
+        try {
+            return getFirstIfExist(instance.getCategories());
+        } catch (ZendeskException e) {
+            assumeNoException("Need to be able to fetch category to run this test", e);
+            throw new IllegalStateException("Not possible here");
+        }
+    }
+
+    private Section getRandomSection()
+    {
+        try {
+            return getFirstIfExist(instance.getSections());
+        } catch (ZendeskException e) {
+            assumeNoException("Need to be able to fetch section to run this test", e);
+            throw new IllegalStateException("Not possible here");
+        }
+    }
+
+    private DynamicContentItemVariant getVariant(Long variantId, Long localeId, String content)
+    {
+        DynamicContentItemVariant variant = new DynamicContentItemVariant();
+        variant.setId(variantId);
+        variant.setContent(content);
+        variant.setActive(true);
+        variant.setIsDefault(false);
+        variant.setLocaleId(localeId);
+        return variant;
+    }
+
+    private <T> List<T> getList(Iterable<T> iterable)
+    {
+        List<T> result = new ArrayList<>();
+        for (T article : iterable) {
+            result.add(article);
+        }
+        return result;
+    }
+
+    private static <T> T getFirstIfExist(final Iterable<T> iterable)
+    {
+        Iterator<T> iterator = iterable.iterator();
+        assumeTrue("At least one entity is required for the test", iterator.hasNext());
+
+        return iterator.next();
+    }
+
+    private static void assertTranslationValid(final Translation translation)
+    {
+        assertNotNull(translation);
+        assertNotNull(translation.getId());
+        assertNotNull(translation.getTitle());
+        // body is not mandatory <https://developer.zendesk.com/rest_api/docs/help_center/translations.html>
+        //assertNotNull(t.getBody());
+    }
+
+
+    private Category category(Long categoryId)
+    {
+        Category category = new Category();
+        category.setId(categoryId);
+        return category;
+    }
+
+    private Section section(Long sectionId)
+    {
+        Section section = new Section();
+        section.setId(sectionId);
+        return section;
     }
 }
