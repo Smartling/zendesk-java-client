@@ -1492,6 +1492,34 @@ public class Zendesk implements AutoCloseable {
                 handleList(Article.class, "articles")));
     }
 
+    public Iterable<Article> getArticlesBySection(int page, int perPage, String locale, String sortBy, String sortOrder, long sectionId) {
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/sections/{section_id}/articles.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("section_id", sectionId)
+                                .set("page", page)
+                                .set("per_page", perPage)
+                                .set("sort_by", sortBy)
+                                .set("sort_order", sortOrder)
+                ),
+                handleList(Article.class, "articles")));
+    }
+
+    public Iterable<Article> getArticlesByCategory(int page, int perPage, String locale, String sortBy, String sortOrder, long categoryId) {
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/categories/{category_id}/articles.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("category_id", categoryId)
+                                .set("page", page)
+                                .set("per_page", perPage)
+                                .set("sort_by", sortBy)
+                                .set("sort_order", sortOrder)
+                ),
+                handleList(Article.class, "articles")));
+    }
+
     public Iterable<Variant> getVariants(long dynamicContentId) {
         return complete(submit(
                 req("GET", tmpl("/dynamic_content/items/{dynamicContentId}/variants.json")
