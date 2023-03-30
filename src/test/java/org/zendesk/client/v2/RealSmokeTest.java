@@ -1367,7 +1367,7 @@ public class RealSmokeTest {
     public void shouldGetArticleByCategory() throws Exception {
         assumeNotNull("Category ID is required to run this test", categoryId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByCategory(1, 10, "en-us", "updated_at", "asc", categoryId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByCategory(new Page(1, 10), new Sorting("updated_at", ASCENDING), "en-us", categoryId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), result.size());
@@ -1377,7 +1377,7 @@ public class RealSmokeTest {
     public void shouldGetArticleBySection() throws Exception {
         assumeNotNull("Section ID is required to run this test", sectionId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesBySection(1, 10, "en-us", "updated_at", "asc", sectionId);
+        Iterable<Article> articleFromSearch = instance.getArticlesBySection(new Page(1, 10), new Sorting("updated_at", ASCENDING), "en-us", sectionId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
