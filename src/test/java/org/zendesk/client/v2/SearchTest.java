@@ -8,6 +8,7 @@ import org.apache.commons.text.RandomStringGenerator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.zendesk.client.v2.model.SearchResults;
@@ -71,12 +72,11 @@ public class SearchTest {
         client = null;
     }
 
-
     @Test
     public void getSearchResults_Sorting() throws JsonProcessingException, UnsupportedEncodingException {
 
         String query = "Greenbriar";
-        String expectedQuery = query + "+type:ticket";
+        String expectedQuery = query + " type:ticket";
         String expectedSortBy = "updated_at";
         String expectedSortOrder = "asc";
 
@@ -90,7 +90,6 @@ public class SearchTest {
         SearchResults<Ticket> searchResults = new SearchResults<>();
         searchResults.setResults(Arrays.asList(expectedTicket1, expectedTicket2));
         searchResults.setCount(2);
-
 
         zendeskApiMock.stubFor(
                 get(
@@ -111,8 +110,5 @@ public class SearchTest {
                 .hasSize(2)
                 .extracting("id")
                 .containsExactly(expectedTicket1.getId(), expectedTicket2.getId());
-
-
-
     }
 }

@@ -1844,7 +1844,7 @@ public class RealSmokeTest {
         createClientWithTokenOrPassword();
         Section section = getFirstIfExist(instance.getSections());
 
-        Translation translation = instance.getSectionTranslation(section.getSourceLocale(), section.getId());
+        Translation translation = instance.showSectionTranslation(section.getId(), section.getSourceLocale());
 
         assertTranslationValid(translation);
     }
@@ -1906,7 +1906,7 @@ public class RealSmokeTest {
         createClientWithTokenOrPassword();
         Category category = getFirstIfExist(instance.getCategories());
 
-        Translation translation = instance.getCategoryTranslation(category.getId(), category.getSourceLocale());
+        Translation translation = instance.showCategoryTranslation(category.getId(), category.getSourceLocale());
 
         assertTranslationValid(translation);
     }
@@ -2177,7 +2177,7 @@ public class RealSmokeTest {
     public void getDynamicContentItemsPaged() throws Exception {
         createClientWithTokenOrPassword();
 
-        Iterable<DynamicContentItem> items = (instance.getDynamicContentItems(new Page(1, 5), new Sorting("created_at", SortOrder.DESCENDING)));
+        Iterable<DynamicContentItem> items = (instance.getDynamicContentItems(1, 5, new Sorting("created_at", SortOrder.DESCENDING)));
 
         int count = 0;
         DynamicContentItem previous = null;
@@ -2311,7 +2311,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldReturnArticlesForSingleLocale() throws Exception {
-        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("updated_at", ASCENDING));
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", 1, 20, new Sorting("updated_at", ASCENDING));
 
         for (Article article : articlesForSpecificLocale) {
             assertTrue(article.getLocale().equals("en-us"));
@@ -2322,7 +2322,7 @@ public class RealSmokeTest {
     public void shouldGetArticleByCategory() throws Exception {
         assumeNotNull("Category ID is required to run this test", categoryId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesByCategory(new Page(1, 10), new Sorting("updated_at", ASCENDING), "en-us", categoryId);
+        Iterable<Article> articleFromSearch = instance.getArticlesByCategory(1, 10, new Sorting("updated_at", ASCENDING), "en-us", categoryId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), result.size());
@@ -2332,7 +2332,7 @@ public class RealSmokeTest {
     public void shouldGetArticleBySection() throws Exception {
         assumeNotNull("Section ID is required to run this test", sectionId);
 
-        Iterable<Article> articleFromSearch = instance.getArticlesBySection(new Page(1, 10), new Sorting("updated_at", ASCENDING), "en-us", sectionId);
+        Iterable<Article> articleFromSearch = instance.getArticlesBySection(1, 10, new Sorting("updated_at", ASCENDING), "en-us", sectionId);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
@@ -2341,7 +2341,7 @@ public class RealSmokeTest {
 
     @Test
     public void sizeShouldShouldBeNotMoreThanPerPageSize() throws Exception {
-        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("updated_at", ASCENDING));
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", 1, 20, new Sorting("updated_at", ASCENDING));
 
         List<Article> articleList = getList(articlesForSpecificLocale);
         assertTrue(articleList.size() <= 20);
@@ -2349,7 +2349,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldBeSortedByTitleInAsc() throws Exception {
-        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("title", ASCENDING));
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", 1, 20, new Sorting("title", ASCENDING));
 
         String previous = null;
 
@@ -2369,7 +2369,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldBeSortedByUpdatedAtInAsc() throws Exception {
-        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("updated_at", ASCENDING));
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", 1, 20, new Sorting("updated_at", ASCENDING));
 
         Date previous = null;
 
@@ -2389,7 +2389,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldBeSortedByTitleInDesc() throws Exception {
-        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("title", DESCENDING));
+        Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", 1, 20, new Sorting("title", DESCENDING));
 
         String previous = null;
 
@@ -2411,7 +2411,7 @@ public class RealSmokeTest {
     public void shouldSearchArticleByCategory() throws Exception {
         assumeNotNull("Category ID is required to run this test", categoryId);
 
-        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", null, null, category(categoryId), new Page(1, 10));
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", null, null, category(categoryId), 1, 10);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), result.size());
@@ -2421,7 +2421,7 @@ public class RealSmokeTest {
     public void shouldSearchArticleBySection() throws Exception {
         assumeNotNull("Section ID is required to run this test", sectionId);
 
-        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", "*", section(sectionId), null, new Page(1, 10));
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", "*", section(sectionId), null, 1, 10);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
@@ -2431,7 +2431,7 @@ public class RealSmokeTest {
     public void shouldSearchArticleByQuery() throws Exception {
         assumeNotNull("Search query is required to run this test", queryString);
 
-        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, null, null, new Page(1, 10));
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, null, null, 1, 10);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query")), result.size());
@@ -2439,7 +2439,7 @@ public class RealSmokeTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowExceptionIfQueryNotProvided() throws Exception {
-        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", null, null, null, new Page(1, 10));
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", null, null, null, 1, 10);
     }
 
     @Test
@@ -2447,7 +2447,7 @@ public class RealSmokeTest {
         assumeNotNull("Search query is required to run this test", queryString);
         assumeNotNull("Category ID is required to run this test", categoryId);
 
-        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, null, category(categoryId), new Page(1, 10));
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, null, category(categoryId), 1, 10);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.category")), result.size());
@@ -2455,7 +2455,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentCategoryId() throws Exception {
-        Iterable<Article> articlesByQueryAndCategory = instance.getArticleFromSearch("en-us", null, null, category(0L), new Page(1, 10));
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticleFromSearch("en-us", null, null, category(0L), 1, 10);
 
         assertTrue(getList(articlesByQueryAndCategory).isEmpty());
     }
@@ -2465,7 +2465,7 @@ public class RealSmokeTest {
         assumeNotNull("Search query is required to run this test", queryString);
         assumeNotNull("Section ID is required to run this test", sectionId);
 
-        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, section(sectionId), null, new Page(1, 10));
+        Iterable<Article> articleFromSearch = instance.getArticleFromSearch("en-us", queryString, section(sectionId), null, 1, 10);
 
         List<Article> result = getList(articleFromSearch);
         assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.query.and.section")), result.size());
@@ -2475,7 +2475,7 @@ public class RealSmokeTest {
     public void shouldReturnSectionsByLocaleAndCategory() throws Exception {
         assumeNotNull("Category ID is required to run this test", categoryId);
 
-        Iterable<Section> sectionsByCategory = instance.getSections("en-us", category(categoryId), new Page(1, 10), new Sorting("updated_at", DESCENDING));
+        Iterable<Section> sectionsByCategory = instance.getSections("en-us", category(categoryId), 1, 10, new Sorting("updated_at", DESCENDING));
 
         List<Section> result = getList(sectionsByCategory);
         assertEquals(Integer.parseInt(config.getProperty("expected.sections.by.category")), result.size());
@@ -2483,7 +2483,7 @@ public class RealSmokeTest {
 
     @Test
     public void shouldReturnEmptyIterableIfQueryNotProvidedAndNonExistentSectionId() throws Exception {
-        Iterable<Article> articlesByQueryAndCategory = instance.getArticleFromSearch("en-us",  null, section(0L), null, new Page(1, 10));
+        Iterable<Article> articlesByQueryAndCategory = instance.getArticleFromSearch("en-us",  null, section(0L), null, 1, 10);
 
         assertTrue(getList(articlesByQueryAndCategory).isEmpty());
     }
@@ -2576,7 +2576,7 @@ public class RealSmokeTest {
     @Test
     public void shouldReturnNotEmptyDynamicContentCollection() throws Exception
     {
-        Iterable<DynamicContentItem> dynamicContent = instance.getDynamicContentItems(new Page(1, 10), new Sorting("updated_at", ASCENDING));
+        Iterable<DynamicContentItem> dynamicContent = instance.getDynamicContentItems(1, 10, new Sorting("updated_at", ASCENDING));
         assertFalse(getList(dynamicContent).isEmpty());
     }
 
@@ -2588,6 +2588,302 @@ public class RealSmokeTest {
         List<ArticleAttachments> attachments = instance.getAttachmentsFromArticle("en-us", existingArticle.getId());
 
         assertNotNull(attachments);
+    }
+
+    @Test
+    public void getUnresolvedViewReturnsANewlyCreatedTicket() throws Exception {
+        createClientWithTokenOrPassword();
+        Ticket ticket = instance.createTicket(newTestTicket());
+        try {
+            assertThat(ticket.getId(), notNullValue());
+
+            Optional<Ticket> maybeTicket = StreamSupport.stream(instance.getView(UNRESOLVED_TICKETS_VIEW_ID).spliterator(), false)
+                    .filter(t -> Objects.equals(t.getId(), ticket.getId()))
+                    .findFirst();
+            assertTrue(maybeTicket.isPresent());
+        } finally {
+            instance.deleteTicket(ticket.getId());
+        }
+    }
+
+    @Test
+    public void getViewReturnsTheUnresolvedView() throws Exception {
+        createClientWithTokenOrPassword();
+        Optional<View> maybeView = StreamSupport.stream(instance.getViews().spliterator(),false)
+                .filter(v -> Objects.equals(v.getId(), UNRESOLVED_TICKETS_VIEW_ID))
+                .findFirst();
+        assertTrue(maybeView.isPresent());
+    }
+
+    // UTILITIES
+
+    /**
+     * Creates in zendesk few organizations (2 entries min, 5 entries max) and verify their existence.
+     *
+     * @return The new organizations
+     */
+    private List<Organization> createTestOrganizationsInZendesk() {
+        final Organization[] orgsToCreate = newTestOrganizations();
+        final Long[] createdOrgsIds = waitJobCompletion(instance.createOrganizations(orgsToCreate))
+                .getResults()
+                .stream()
+                .map(JobResult::getId)
+                .toArray(Long[]::new);
+        assumeThat("All created organizations should have an ID", createdOrgsIds.length, is(orgsToCreate.length));
+        final List<Organization> createdOrganizations = Arrays.stream(createdOrgsIds)
+                .map(instance::getOrganization)
+                .collect(Collectors.toList());
+        assumeThat("All created organizations are found in zendesk",
+                createdOrganizations.stream().map(Organization::getId).collect(Collectors.toList()),
+                containsInAnyOrder(createdOrgsIds));
+        LOGGER.info("Test organizations: {}", Arrays.toString(createdOrgsIds));
+        return createdOrganizations;
+    }
+
+    /**
+     * Creates several new organizations (2 min, 5 max)
+     */
+    private Organization[] newTestOrganizations() {
+        final ArrayList<Organization> organizations = new ArrayList<>();
+        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
+            organizations.add(newTestOrganization());
+        }
+        return organizations.toArray(new Organization[0]);
+    }
+
+    /**
+     * Creates a new organization
+     */
+    private Organization newTestOrganization() {
+        final Organization organization = new Organization();
+        final String id = UUID.randomUUID().toString();
+        organization.setExternalId("org-" + id);
+        organization.setName("[zendesk-java-client] Organization " + id);
+        organization.setDetails("This organization is created by zendesk-java-client Integration Tests");
+        organization.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
+        return organization;
+    }
+
+    /**
+     * Creates in zendesk few users (2 entries min, 5 entries max) and verify their existence.
+     *
+     * @return The new users
+     */
+    private List<User> createTestUsersInZendesk() {
+        final User[] usersToCreate = newTestUsers();
+        final Long[] createdUsersIds = waitJobCompletion(instance.createUsers(usersToCreate))
+                .getResults()
+                .stream()
+                .map(JobResult::getId)
+                .toArray(Long[]::new);
+        assumeThat("All created users should have an ID", createdUsersIds.length, is(usersToCreate.length));
+        final List<User> createdUsers = Arrays.stream(createdUsersIds)
+                .map(instance::getUser)
+                .collect(Collectors.toList());
+        assumeThat("All created users are found in zendesk",
+                createdUsers.stream().map(User::getId).collect(Collectors.toList()),
+                containsInAnyOrder(createdUsersIds));
+        LOGGER.info("Test users: {}", Arrays.toString(createdUsersIds));
+        return createdUsers;
+    }
+
+    /**
+     * Creates several new users (2 min, 5 max)
+     */
+    private User[] newTestUsers() {
+        final ArrayList<User> users = new ArrayList<>();
+        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
+            users.add(newTestUser());
+        }
+        return users.toArray(new User[0]);
+    }
+
+    /**
+     * Creates a new user
+     */
+    private User newTestUser() {
+        final User user = new User();
+        final String id = UUID.randomUUID().toString();
+        user.setExternalId("user-" + id);
+        user.setName("[zendesk-java-client] User " + id);
+        user.setDetails("This user is created by zendesk-java-client Integration Tests");
+        user.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
+        user.setEmail(id + "@test.com");
+        return user;
+    }
+
+    /**
+     * Creates in zendesk few tickets (2 entries min, 5 entries max) and verify their existence.
+     *
+     * @return The new tickets
+     */
+    private List<Ticket> createTestTicketsInZendesk() {
+        final Ticket[] ticketsToCreate = newTestTickets();
+        final Long[] createdTicketsIds = waitJobCompletion(instance.createTickets(ticketsToCreate))
+                .getResults()
+                .stream()
+                .map(JobResult::getId)
+                .toArray(Long[]::new);
+        assumeThat("All created tickets should have an ID", createdTicketsIds.length, is(ticketsToCreate.length));
+        final List<Ticket> createdTickets =
+                instance.getTickets(firstElement(createdTicketsIds), otherElements(createdTicketsIds));
+        assumeThat("All created tickets are found in zendesk",
+                createdTickets.stream().map(Ticket::getId).collect(Collectors.toList()),
+                containsInAnyOrder(createdTicketsIds));
+        LOGGER.info("Test tickets: {}", Arrays.toString(createdTicketsIds));
+        return createdTickets;
+    }
+
+    /**
+     * Creates several new tickets (2 min, 5 max)
+     */
+    private Ticket[] newTestTickets() {
+        final ArrayList<Ticket> tickets = new ArrayList<>();
+        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
+            tickets.add(newTestTicket());
+        }
+        return tickets.toArray(new Ticket[0]);
+    }
+
+    /**
+     * Creates a new ticket
+     */
+    private Ticket newTestTicket() {
+        assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
+        assumeThat("Must have a requester name", config.getProperty("requester.name"), notNullValue());
+        final Ticket ticket = new Ticket(
+                new Ticket.Requester(config.getProperty("requester.name"), config.getProperty("requester.email")),
+                "[zendesk-java-client] This is a test " + UUID.randomUUID().toString(),
+                new Comment(TICKET_COMMENT1));
+        ticket.setCollaborators(Arrays.asList(new Collaborator("Bob Example", "bob@example.org"),
+                new Collaborator("Alice Example", "alice@example.org")));
+        ticket.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
+        return ticket;
+    }
+
+    /**
+     * Creates several new ticketImport (2 min, 5 max)
+     */
+    private TicketImport[] newTestTicketImports() {
+        final ArrayList<TicketImport> ticketImports = new ArrayList<>();
+        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
+            ticketImports.add(newTestTicketImport());
+        }
+        return ticketImports.toArray(new TicketImport[0]);
+    }
+
+    /**
+     * Creates a new ticketImport
+     */
+    private TicketImport newTestTicketImport() {
+        assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
+        assumeThat("Must have a requester name", config.getProperty("requester.name"), notNullValue());
+        Date now = Calendar.getInstance().getTime();
+        final TicketImport ticketImport = new TicketImport(
+                new Ticket.Requester(config.getProperty("requester.name"), config.getProperty("requester.email")),
+                "[zendesk-java-client] This is a test " + UUID.randomUUID().toString(),
+                Collections.singletonList(new Comment(TICKET_COMMENT1)));
+        ticketImport.setCollaborators(Arrays.asList(new Collaborator("Bob Example", "bob@example.org"),
+                new Collaborator("Alice Example", "alice@example.org")));
+        ticketImport.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
+        ticketImport.setStatus(Status.CLOSED);
+        ticketImport.setCreatedAt(now);
+        ticketImport.setUpdatedAt(now);
+        ticketImport.setSolvedAt(now);
+        return ticketImport;
+    }
+
+    /**
+     * Wait until a given JobStatus is marked as completed
+     *
+     * @param result The Job result to verify
+     * @return The completed job result
+     */
+    private JobStatus waitJobCompletion(final JobStatus result) {
+        // Let's validate the first result
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertNotNull(result.getStatus());
+
+        // Let's wait for its completion (2 minutes max)
+        await().until(() ->
+                instance.getJobStatus(result).getStatus() == JobStatus.JobStatusEnum.completed);
+
+        // Let's validate and return the completed result
+        final JobStatus completedResult = instance.getJobStatus(result);
+        assertNotNull(completedResult);
+        assertNotNull(completedResult.getId());
+        assertNotNull(completedResult.getStatus());
+        LOGGER.info("Completed Job Result: {}", completedResult);
+        return completedResult;
+    }
+
+    /**
+     * Wait to have a ticket listed in the deleted tickets end-point
+     *
+     * @param ticketId The identifier of the ticket to delete
+     */
+    private void waitTicketDeleted(long ticketId) {
+        // Wait for the confirmation
+        await().until(() -> StreamSupport
+                .stream(instance.getDeletedTickets("id", SortOrder.DESCENDING).spliterator(), false)
+                .map(DeletedTicket::getId)
+                .collect(Collectors.toList())
+                .contains(ticketId));
+    }
+
+    /**
+     * Wait to have the tickets listed in the deleted tickets end-point
+     *
+     * @param ticketsIds The identifier of tickets to delete
+     */
+    private void waitTicketsDeleted(Long[] ticketsIds) {
+        // Wait for the confirmation
+        await().until(() -> StreamSupport
+                .stream(instance.getDeletedTickets("id", SortOrder.DESCENDING).spliterator(), false)
+                .map(DeletedTicket::getId)
+                .collect(Collectors.toList())
+                .containsAll(Arrays.asList(ticketsIds)));
+    }
+
+    private long firstElement(Long[] array) {
+        return array[0];
+    }
+
+    private long[] otherElements(Long[] array) {
+        return Arrays.stream(Arrays.copyOfRange(array, 1, array.length))
+                .filter(Objects::nonNull)
+                .mapToLong(Long::longValue)
+                .toArray();
+    }
+
+    /**
+     * Creates a new ticket form
+     * @param givenName provided name of the form
+     * @return created form object
+     */
+    private TicketForm newTicketForm(String givenName) {
+        TicketForm form = new TicketForm();
+        form.setActive(true);
+        form.setName(givenName);
+        form.setDisplayName(givenName);
+        form.setRawName(givenName);
+        form.setRawDisplayName(givenName);
+        return form;
+    }
+
+    /**
+     * Verifies field on the ticket form
+     * @param form the ticket form to verify fields in
+     * @param name expected name of the form
+     */
+    private void checkFields(TicketForm form, String name) {
+        assertNotNull(form);
+        assertNotNull(form.getId());
+        assertEquals(name, form.getName());
+        assertEquals(name, form.getDisplayName());
+        assertEquals(name, form.getRawName());
+        assertEquals(name, form.getRawDisplayName());
     }
 
     private Article getRandomArticle()
@@ -2670,303 +2966,6 @@ public class RealSmokeTest {
         Section section = new Section();
         section.setId(sectionId);
         return section;
-    }
-}
-
-    @Test
-    public void getUnresolvedViewReturnsANewlyCreatedTicket() throws Exception {
-        createClientWithTokenOrPassword();
-        Ticket ticket = instance.createTicket(newTestTicket());
-        try {
-            assertThat(ticket.getId(), notNullValue());
-
-            Optional<Ticket> maybeTicket = StreamSupport.stream(instance.getView(UNRESOLVED_TICKETS_VIEW_ID).spliterator(), false)
-                    .filter(t -> Objects.equals(t.getId(), ticket.getId()))
-                    .findFirst();
-            assertTrue(maybeTicket.isPresent());
-        } finally {
-            instance.deleteTicket(ticket.getId());
-        }
-    }
-
-    @Test
-    public void getViewReturnsTheUnresolvedView() throws Exception {
-        createClientWithTokenOrPassword();
-        Optional<View> maybeView = StreamSupport.stream(instance.getViews().spliterator(),false)
-                .filter(v -> Objects.equals(v.getId(), UNRESOLVED_TICKETS_VIEW_ID))
-                .findFirst();
-        assertTrue(maybeView.isPresent());
-    }
-
-    // UTILITIES
-
-    /**
-     * Creates in zendesk few organizations (2 entries min, 5 entries max) and verify their existence.
-     *
-     * @return The new organizations
-     */
-    private List<Organization> createTestOrganizationsInZendesk() {
-        final Organization[] orgsToCreate = newTestOrganizations();
-        final Long[] createdOrgsIds = waitJobCompletion(instance.createOrganizations(orgsToCreate))
-              .getResults()
-              .stream()
-              .map(JobResult::getId)
-              .toArray(Long[]::new);
-        assumeThat("All created organizations should have an ID", createdOrgsIds.length, is(orgsToCreate.length));
-        final List<Organization> createdOrganizations = Arrays.stream(createdOrgsIds)
-              .map(instance::getOrganization)
-              .collect(Collectors.toList());
-        assumeThat("All created organizations are found in zendesk",
-              createdOrganizations.stream().map(Organization::getId).collect(Collectors.toList()),
-              containsInAnyOrder(createdOrgsIds));
-        LOGGER.info("Test organizations: {}", Arrays.toString(createdOrgsIds));
-        return createdOrganizations;
-    }
-
-    /**
-     * Creates several new organizations (2 min, 5 max)
-     */
-    private Organization[] newTestOrganizations() {
-        final ArrayList<Organization> organizations = new ArrayList<>();
-        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
-            organizations.add(newTestOrganization());
-        }
-        return organizations.toArray(new Organization[0]);
-    }
-
-    /**
-     * Creates a new organization
-     */
-    private Organization newTestOrganization() {
-        final Organization organization = new Organization();
-        final String id = UUID.randomUUID().toString();
-        organization.setExternalId("org-" + id);
-        organization.setName("[zendesk-java-client] Organization " + id);
-        organization.setDetails("This organization is created by zendesk-java-client Integration Tests");
-        organization.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
-        return organization;
-    }
-
-    /**
-     * Creates in zendesk few users (2 entries min, 5 entries max) and verify their existence.
-     *
-     * @return The new users
-     */
-    private List<User> createTestUsersInZendesk() {
-        final User[] usersToCreate = newTestUsers();
-        final Long[] createdUsersIds = waitJobCompletion(instance.createUsers(usersToCreate))
-              .getResults()
-              .stream()
-              .map(JobResult::getId)
-              .toArray(Long[]::new);
-        assumeThat("All created users should have an ID", createdUsersIds.length, is(usersToCreate.length));
-        final List<User> createdUsers = Arrays.stream(createdUsersIds)
-              .map(instance::getUser)
-              .collect(Collectors.toList());
-        assumeThat("All created users are found in zendesk",
-              createdUsers.stream().map(User::getId).collect(Collectors.toList()),
-              containsInAnyOrder(createdUsersIds));
-        LOGGER.info("Test users: {}", Arrays.toString(createdUsersIds));
-        return createdUsers;
-    }
-
-    /**
-     * Creates several new users (2 min, 5 max)
-     */
-    private User[] newTestUsers() {
-        final ArrayList<User> users = new ArrayList<>();
-        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
-            users.add(newTestUser());
-        }
-        return users.toArray(new User[0]);
-    }
-
-    /**
-     * Creates a new user
-     */
-    private User newTestUser() {
-        final User user = new User();
-        final String id = UUID.randomUUID().toString();
-        user.setExternalId("user-" + id);
-        user.setName("[zendesk-java-client] User " + id);
-        user.setDetails("This user is created by zendesk-java-client Integration Tests");
-        user.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
-        user.setEmail(id + "@test.com");
-        return user;
-    }
-
-    /**
-     * Creates in zendesk few tickets (2 entries min, 5 entries max) and verify their existence.
-     *
-     * @return The new tickets
-     */
-    private List<Ticket> createTestTicketsInZendesk() {
-        final Ticket[] ticketsToCreate = newTestTickets();
-        final Long[] createdTicketsIds = waitJobCompletion(instance.createTickets(ticketsToCreate))
-              .getResults()
-              .stream()
-              .map(JobResult::getId)
-              .toArray(Long[]::new);
-        assumeThat("All created tickets should have an ID", createdTicketsIds.length, is(ticketsToCreate.length));
-        final List<Ticket> createdTickets =
-              instance.getTickets(firstElement(createdTicketsIds), otherElements(createdTicketsIds));
-        assumeThat("All created tickets are found in zendesk",
-              createdTickets.stream().map(Ticket::getId).collect(Collectors.toList()),
-              containsInAnyOrder(createdTicketsIds));
-        LOGGER.info("Test tickets: {}", Arrays.toString(createdTicketsIds));
-        return createdTickets;
-    }
-
-    /**
-     * Creates several new tickets (2 min, 5 max)
-     */
-    private Ticket[] newTestTickets() {
-        final ArrayList<Ticket> tickets = new ArrayList<>();
-        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
-            tickets.add(newTestTicket());
-        }
-        return tickets.toArray(new Ticket[0]);
-    }
-
-    /**
-     * Creates a new ticket
-     */
-    private Ticket newTestTicket() {
-        assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
-        assumeThat("Must have a requester name", config.getProperty("requester.name"), notNullValue());
-        final Ticket ticket = new Ticket(
-              new Ticket.Requester(config.getProperty("requester.name"), config.getProperty("requester.email")),
-              "[zendesk-java-client] This is a test " + UUID.randomUUID().toString(),
-              new Comment(TICKET_COMMENT1));
-        ticket.setCollaborators(Arrays.asList(new Collaborator("Bob Example", "bob@example.org"),
-              new Collaborator("Alice Example", "alice@example.org")));
-        ticket.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
-        return ticket;
-    }
-
-    /**
-     * Creates several new ticketImport (2 min, 5 max)
-     */
-    private TicketImport[] newTestTicketImports() {
-        final ArrayList<TicketImport> ticketImports = new ArrayList<>();
-        for (int i = 0; i < 2 + RANDOM.nextInt(3); i++) {
-            ticketImports.add(newTestTicketImport());
-        }
-        return ticketImports.toArray(new TicketImport[0]);
-    }
-
-    /**
-     * Creates a new ticketImport
-     */
-    private TicketImport newTestTicketImport() {
-        assumeThat("Must have a requester email", config.getProperty("requester.email"), notNullValue());
-        assumeThat("Must have a requester name", config.getProperty("requester.name"), notNullValue());
-        Date now = Calendar.getInstance().getTime();
-        final TicketImport ticketImport = new TicketImport(
-              new Ticket.Requester(config.getProperty("requester.name"), config.getProperty("requester.email")),
-              "[zendesk-java-client] This is a test " + UUID.randomUUID().toString(),
-              Collections.singletonList(new Comment(TICKET_COMMENT1)));
-        ticketImport.setCollaborators(Arrays.asList(new Collaborator("Bob Example", "bob@example.org"),
-              new Collaborator("Alice Example", "alice@example.org")));
-        ticketImport.setTags(Arrays.asList("zendesk-java-client", "smoke-test"));
-        ticketImport.setStatus(Status.CLOSED);
-        ticketImport.setCreatedAt(now);
-        ticketImport.setUpdatedAt(now);
-        ticketImport.setSolvedAt(now);
-        return ticketImport;
-    }
-
-    /**
-     * Wait until a given JobStatus is marked as completed
-     *
-     * @param result The Job result to verify
-     * @return The completed job result
-     */
-    private JobStatus waitJobCompletion(final JobStatus result) {
-        // Let's validate the first result
-        assertNotNull(result);
-        assertNotNull(result.getId());
-        assertNotNull(result.getStatus());
-
-        // Let's wait for its completion (2 minutes max)
-        await().until(() ->
-              instance.getJobStatus(result).getStatus() == JobStatus.JobStatusEnum.completed);
-
-        // Let's validate and return the completed result
-        final JobStatus completedResult = instance.getJobStatus(result);
-        assertNotNull(completedResult);
-        assertNotNull(completedResult.getId());
-        assertNotNull(completedResult.getStatus());
-        LOGGER.info("Completed Job Result: {}", completedResult);
-        return completedResult;
-    }
-
-    /**
-     * Wait to have a ticket listed in the deleted tickets end-point
-     *
-     * @param ticketId The identifier of the ticket to delete
-     */
-    private void waitTicketDeleted(long ticketId) {
-        // Wait for the confirmation
-        await().until(() -> StreamSupport
-              .stream(instance.getDeletedTickets("id", SortOrder.DESCENDING).spliterator(), false)
-              .map(DeletedTicket::getId)
-              .collect(Collectors.toList())
-              .contains(ticketId));
-    }
-
-    /**
-     * Wait to have the tickets listed in the deleted tickets end-point
-     *
-     * @param ticketsIds The identifier of tickets to delete
-     */
-    private void waitTicketsDeleted(Long[] ticketsIds) {
-        // Wait for the confirmation
-        await().until(() -> StreamSupport
-              .stream(instance.getDeletedTickets("id", SortOrder.DESCENDING).spliterator(), false)
-              .map(DeletedTicket::getId)
-              .collect(Collectors.toList())
-              .containsAll(Arrays.asList(ticketsIds)));
-    }
-
-    private long firstElement(Long[] array) {
-        return array[0];
-    }
-
-    private long[] otherElements(Long[] array) {
-        return Arrays.stream(Arrays.copyOfRange(array, 1, array.length))
-              .filter(Objects::nonNull)
-              .mapToLong(Long::longValue)
-              .toArray();
-    }
-
-    /**
-     * Creates a new ticket form
-     * @param givenName provided name of the form
-     * @return created form object
-     */
-    private TicketForm newTicketForm(String givenName) {
-        TicketForm form = new TicketForm();
-        form.setActive(true);
-        form.setName(givenName);
-        form.setDisplayName(givenName);
-        form.setRawName(givenName);
-        form.setRawDisplayName(givenName);
-        return form;
-    }
-
-    /**
-     * Verifies field on the ticket form
-     * @param form the ticket form to verify fields in
-     * @param name expected name of the form
-     */
-    private void checkFields(TicketForm form, String name) {
-        assertNotNull(form);
-        assertNotNull(form.getId());
-        assertEquals(name, form.getName());
-        assertEquals(name, form.getDisplayName());
-        assertEquals(name, form.getRawName());
-        assertEquals(name, form.getRawDisplayName());
     }
 }
 

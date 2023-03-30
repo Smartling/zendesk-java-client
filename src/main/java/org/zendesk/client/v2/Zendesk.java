@@ -215,7 +215,6 @@ public class Zendesk implements Closeable {
     // Action methods
     //////////////////////////////////////////////////////////////////////
 
-    public JobStatus getJobStatus(JobStatus status) {
     public String getOAuthToken(String subdomain, String code, String redirectUri, String clientId, String clientSecret) {
         return complete(submit(reqUnauthorized("POST", new TemplateUri("https://{subdomain}.zendesk.com/oauth/tokens").set("subdomain", subdomain),
                 JSON, json(new OAuthRequest(code, redirectUri, clientId, clientSecret))
@@ -223,7 +222,7 @@ public class Zendesk implements Closeable {
                 handle(OAuthToken.class))).getAccessToken();
     }
 
-    public <T> JobStatus<T> getJobStatus(JobStatus<T> status) {
+    public JobStatus getJobStatus(JobStatus status) {
         return complete(getJobStatusAsync(status));
     }
 
@@ -508,7 +507,7 @@ public class Zendesk implements Closeable {
                 .set("query", searchTerm).set("section", sectionId), handleList(Article.class, "results"));
     }
 
-    public Iterable<Article> getArticleFromSearch(String locale, String searchTerm, Section section, Category category, Page page) {
+    public Iterable<Article> getArticleFromSearch(String locale, String searchTerm, Section section, Category category, int page, int perPage) {
 
         TemplateUri tmpl = tmpl("/help_center/articles/search.json{?locale,query,category,section,page,per_page}")
                 .set("locale", locale)
@@ -524,11 +523,8 @@ public class Zendesk implements Closeable {
             tmpl.set("section", section.getId());
         }
 
-        if(page != null)
-        {
-            tmpl.set("page", page.getPageNo());
-            tmpl.set("per_page", page.getPerPage());
-        }
+        tmpl.set("page", page);
+        tmpl.set("per_page", perPage);
 
         return complete(submit(req("GET", tmpl), handleList(Article.class, "results")));
     }
@@ -2038,12 +2034,12 @@ public class Zendesk implements Closeable {
         return new PagedIterable<>(cnst("/dynamic_content/items.json"), handleList(DynamicContentItem.class, "items"));
     }
 
-    public Iterable<DynamicContentItem> getDynamicContentItems(Page page, Sorting sorting) {
+    public Iterable<DynamicContentItem> getDynamicContentItems(int page, int perPage, Sorting sorting) {
         return complete(submit(
                 req("GET",
                         tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
-                        .set("page", page.getPageNo())
-                        .set("per_page", page.getPerPage())
+                        .set("page", page)
+                        .set("per_page", perPage)
                         .set("sort_by", sorting.getSortBy())
                         .set("sort_order", sorting.getSortOrder().getQueryParameter())
                 ),
@@ -2345,41 +2341,41 @@ public class Zendesk implements Closeable {
                 handleList(Article.class, "articles")));
     }
 
-    public Iterable<Article> getArticles(String locale, Page page, Sorting sorting) {
+    public Iterable<Article> getArticles(String locale, int page, int perPage, Sorting sorting) {
         return complete(submit(
                 req("GET",
                         tmpl("/help_center/{locale}/articles.json{?page,per_page,sort_by,sort_order}")
                                 .set("locale", locale)
-                                .set("page", page.getPageNo())
-                                .set("per_page", page.getPerPage())
+                                .set("page", page)
+                                .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
                                 .set("sort_order", sorting.getSortOrder())
                 ),
                 handleList(Article.class, "articles")));
     }
 
-    public Iterable<Article> getArticlesBySection(Page page, Sorting sorting, String locale, long sectionId) {
+    public Iterable<Article> getArticlesBySection(int page, int perPage, Sorting sorting, String locale, long sectionId) {
         return complete(submit(
                 req("GET",
                         tmpl("/help_center/{locale}/sections/{section_id}/articles.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                                 .set("locale", locale)
                                 .set("section_id", sectionId)
-                                .set("page", page.getPageNo())
-                                .set("per_page", page.getPerPage())
+                                .set("page", page)
+                                .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
                                 .set("sort_order", sorting.getSortOrder())
                 ),
                 handleList(Article.class, "articles")));
     }
 
-    public Iterable<Article> getArticlesByCategory(Page page, Sorting sorting, String locale, long categoryId) {
+    public Iterable<Article> getArticlesByCategory(int page, int perPage, Sorting sorting, String locale, long categoryId) {
         return complete(submit(
                 req("GET",
                         tmpl("/help_center/{locale}/categories/{category_id}/articles.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                                 .set("locale", locale)
                                 .set("category_id", categoryId)
-                                .set("page", page.getPageNo())
-                                .set("per_page", page.getPerPage())
+                                .set("page", page)
+                                .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
                                 .set("sort_order", sorting.getSortOrder())
                 ),
@@ -2499,13 +2495,13 @@ public class Zendesk implements Closeable {
                 handleList(Category.class, "categories"));
     }
 
-    public Iterable<Category> getCategories(String locale, Page page, Sorting sorting) {
+    public Iterable<Category> getCategories(String locale, int page, int perPage, Sorting sorting) {
         return complete(submit(
                 req("GET",
                         tmpl("/help_center/{locale}/categories.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                                 .set("locale", locale)
-                                .set("page", page.getPageNo())
-                                .set("per_page", page.getPerPage())
+                                .set("page", page)
+                                .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
                                 .set("sort_order", sorting.getSortOrder().getQueryParameter())
                         ),
@@ -2528,15 +2524,6 @@ public class Zendesk implements Closeable {
                 tmpl("/help_center/categories/{categoryId}/translations.json").set("categoryId", categoryId),
                 handleList(Translation.class, "translations"));
     }
-
-    public Translation getCategoryTranslation(Long categoryId, String locale) {
-        return complete(submit(req("GET", tmpl("/help_center/categories/{categoryId}/translations/{locale}.json")
-                        .set("categoryId", categoryId)
-                        .set("locale", locale)),
-                handle(Translation.class, "translation")
-        ));
-    }
-
 
     public Translation showCategoryTranslation(long categoryId, String locale) {
         return complete(submit(req("GET",
@@ -2586,28 +2573,28 @@ public class Zendesk implements Closeable {
                 handleList(Section.class, "sections"));
     }
 
-    public Iterable<Section> getSections(String locale, Page page, Sorting sorting) {
+    public Iterable<Section> getSections(String locale, int page, int perPage, Sorting sorting) {
         return complete(submit(
                 req("GET",
                         tmpl("/help_center/{locale}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                                 .set("locale", locale)
-                                .set("page", page.getPageNo())
-                                .set("per_page", page.getPerPage())
+                                .set("page", page)
+                                .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
                                 .set("sort_order", sorting.getSortOrder().getQueryParameter())
                         ),
         handleList(Section.class, "sections")));
     }
 
-    public Iterable<Section> getSections(String locale, Category category, Page page, Sorting sorting) {
+    public Iterable<Section> getSections(String locale, Category category, int page, int perPage, Sorting sorting) {
         checkHasId(category);
         return complete(submit(
                 req("GET",
                         tmpl("/help_center/{locale}/categories/{categoryId}/sections.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
                                 .set("locale", locale)
                                 .set("categoryId", category.getId())
-                                .set("page", page.getPageNo())
-                                .set("per_page", page.getPerPage())
+                                .set("page", page)
+                                .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
                                 .set("sort_order", sorting.getSortOrder().getQueryParameter())
                          ),
@@ -2629,12 +2616,6 @@ public class Zendesk implements Closeable {
                 tmpl("/help_center/sections/{sectionId}/translations.json").set("sectionId", sectionId),
                 handleList(Translation.class, "translations"));
     }
-
-    public Translation getSectionTranslation(String locale, long sectionId) {
-        return complete(submit(req("GET", tmpl("/help_center/sections/{sectionId}/translations/{locale}.json").set("sectionId", sectionId).set("locale", locale)),
-                handle(Translation.class, "translation")));
-    }
-
 
     public Translation showSectionTranslation(long sectionId, String locale) {
         return complete(submit(req("GET",
