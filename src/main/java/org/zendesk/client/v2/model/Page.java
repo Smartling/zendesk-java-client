@@ -1,66 +1,56 @@
 package org.zendesk.client.v2.model;
 
-import java.util.Objects;
+import java.io.Serializable;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Page
-{
-    int pageNo;
-    int perPage;
+/**
+ * This is the base class for implementing pagination on any SearchResultEntity
+ */
+public abstract class Page<T extends SearchResultEntity> implements Serializable {
 
-    public Page()
-    {
-    }
+  private static final long serialVersionUID = 456807064715979598L;
 
-    public Page(int pageNo, int perPage)
-    {
-        this.pageNo = pageNo;
-        this.perPage = perPage;
-    }
+  private @JsonProperty("next_page") String nextPage;
 
-    public int getPageNo()
-    {
-        return pageNo;
-    }
+  private @JsonProperty("previous_page") String previousPage;
 
-    public void setPageNo(int pageNo)
-    {
-        this.pageNo = pageNo;
-    }
+  private List<T> results;
 
-    public int getPerPage()
-    {
-        return perPage;
-    }
+  private int count;
 
-    public void setPerPage(int perPage)
-    {
-        this.perPage = perPage;
-    }
+  public abstract Class<T> getTargetClass();
 
-    @Override
-    public String toString()
-    {
-        return "Page{" +
-                "page=" + pageNo +
-                ", perPage=" + perPage +
-                '}';
-    }
+  public  List<T> getResults(){
+    return results;
+  }
 
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        Page page1 = (Page) o;
-        return pageNo == page1.pageNo &&
-                perPage == page1.perPage;
-    }
+  public void setResults(final List<T> results) {
+    this.results = results;
+  }
 
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(pageNo, perPage);
-    }
+  public String getNextPage() {
+    return nextPage;
+  }
+
+  public void setNextPage(final String nextPage) {
+    this.nextPage = nextPage;
+  }
+
+  public String getPreviousPage() {
+    return previousPage;
+  }
+
+  public void setPreviousPage(final String previousPage) {
+    this.previousPage = previousPage;
+  }
+
+  public int getCount() {
+    return count;
+  }
+
+  public void setCount(final int count) {
+    this.count = count;
+  }
+
 }
