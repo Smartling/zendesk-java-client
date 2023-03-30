@@ -2025,10 +2025,80 @@ public class Zendesk implements Closeable {
                 req("GET",
                         tmpl("/help_center/{locale}/articles.json{?page,per_page,sort_by,sort_order}")
                                 .set("locale", locale)
-                                .set("page", page.getPageNo())
-                                .set("per_page", page.getPerPage())
-                                .set("sort_by", sorting.getSortBy())
-                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
+                                .set("page", page)
+                                .set("per_page", perPage)
+                                .set("sort_by", sortBy)
+                                .set("sort_order", sortOrder)
+                ),
+                handleList(Article.class, "articles")));
+    }
+
+    public Iterable<Article> getArticlesBySection(int page, int perPage, String locale, String sortBy, String sortOrder, long sectionId) {
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/sections/{section_id}/articles.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("section_id", sectionId)
+                                .set("page", page)
+                                .set("per_page", perPage)
+                                .set("sort_by", sortBy)
+                                .set("sort_order", sortOrder)
+                ),
+                handleList(Article.class, "articles")));
+    }
+
+    public Iterable<Article> getArticlesByCategory(int page, int perPage, String locale, String sortBy, String sortOrder, long categoryId) {
+        return complete(submit(
+                req("GET",
+                        tmpl("/help_center/{locale}/categories/{category_id}/articles.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                                .set("locale", locale)
+                                .set("category_id", categoryId)
+                                .set("page", page)
+                                .set("per_page", perPage)
+                                .set("sort_by", sortBy)
+                                .set("sort_order", sortOrder)
+                ),
+                handleList(Article.class, "articles")));
+    }
+
+    public Iterable<Variant> getVariants(long dynamicContentId) {
+        return complete(submit(
+                req("GET", tmpl("/dynamic_content/items/{dynamicContentId}/variants.json")
+                        .set("dynamicContentId", dynamicContentId)
+                ),
+                handleList(Variant.class, "variants")
+        ));
+    }
+
+    public Variant getVariantById(long dynamicContentId, long variantId){
+        return complete(submit(
+                req("GET", tmpl("/dynamic_content/items/{dynamicContentId}/variants/{variantId}.json")
+                        .set("dynamicContentId", dynamicContentId)
+                        .set("variantId", variantId)
+                ),
+                handle(Variant.class, "variant")
+        ));
+    }
+
+    public Variant createVariant(long dynamicContentId, Variant variant) {
+        return complete(submit(req("POST", tmpl("/dynamic_content/items/{id}/variants.json").set("id", dynamicContentId),
+                JSON, json(Collections.singletonMap("variant", variant))), handle(Variant.class, "variant")));
+    }
+
+    public Variant updateVariant(long dynamicContentId, Variant variant) {
+        return complete(submit(req("PUT", tmpl("/dynamic_content/items/{id}/variants/{variantId}.json")
+                        .set("id", dynamicContentId)
+                        .set("variantId", variant.getId()),
+                JSON, json(Collections.singletonMap("variant", variant))), handle(Variant.class, "variant")));
+    }
+
+    public Iterable<DynamicContentItem> getDynamicContentItems(int page, int perPage, String sortBy, String sortOrder) {
+        return complete(submit(
+                req("GET", tmpl("/dynamic_content/items.json?page={page}&per_page={per_page}&sort_by={sort_by}&sort_order={sort_order}")
+                        .set("page", page)
+                        .set("per_page", perPage)
+                        .set("sort_by", sortBy)
+                        .set("sort_order", sortOrder)
                 ),
                 handleList(Article.class, "articles")));
     }

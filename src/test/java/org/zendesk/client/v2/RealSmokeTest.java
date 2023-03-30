@@ -1364,6 +1364,27 @@ public class RealSmokeTest {
     }
 
     @Test
+    public void shouldGetArticleByCategory() throws Exception {
+        assumeNotNull("Category ID is required to run this test", categoryId);
+
+        Iterable<Article> articleFromSearch = instance.getArticlesByCategory(1, 10, "en-us", "updated_at", "asc", categoryId);
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.category")), result.size());
+    }
+
+    @Test
+    public void shouldGetArticleBySection() throws Exception {
+        assumeNotNull("Section ID is required to run this test", sectionId);
+
+        Iterable<Article> articleFromSearch = instance.getArticlesBySection(1, 10, "en-us", "updated_at", "asc", sectionId);
+
+        List<Article> result = getList(articleFromSearch);
+        assertEquals(Integer.parseInt(config.getProperty("expected.articles.by.section")), result.size());
+    }
+
+
+    @Test
     public void sizeShouldShouldBeNotMoreThanPerPageSize() throws Exception {
         Iterable<Article> articlesForSpecificLocale = instance.getArticles("en-us", new Page(1, 20), new Sorting("updated_at", ASCENDING));
 
