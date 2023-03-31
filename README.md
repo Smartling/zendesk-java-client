@@ -3,12 +3,6 @@ Zendesk Java Client
 
 This is a [Zendesk][zd] client implementation written in Java using AsyncHttpClient and Jackson.
 
-[![Java CI with Maven](https://github.com/cloudbees-oss/zendesk-java-client/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/cloudbees-oss/zendesk-java-client/actions?query=workflow%3A%22Java+CI+with+Maven%22) 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.cloudbees.thirdparty/zendesk-java-client/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.cloudbees.thirdparty/zendesk-java-client/) 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.cloudbees.thirdparty%3Azendesk-java-client&metric=coverage)](https://sonarcloud.io/dashboard?id=com.cloudbees.thirdparty%3Azendesk-java-client) 
-[![Lines](https://sonarcloud.io/api/project_badges/measure?project=com.cloudbees.thirdparty%3Azendesk-java-client&metric=ncloc)](https://sonarcloud.io/dashboard?id=com.cloudbees.thirdparty%3Azendesk-java-client) 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.cloudbees.thirdparty%3Azendesk-java-client&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.cloudbees.thirdparty%3Azendesk-java-client)
-
 Using the API
 -------------
 
@@ -33,11 +27,12 @@ all records have been fetched, so e.g.
 will iterate through *all* tickets. Most likely you will want to implement your own cut-off process to stop iterating
 when you have got enough data.
 
-Community
--------------
+Smartling additions
+-------------------
 
-* [Users list](https://groups.google.com/forum/#!forum/zendesk-java-client-users)
-* [GitHub discussions](https://github.com/cloudbees-oss/zendesk-java-client/discussions)
+* Pageable and sortable search for articles, sections, categories and dynamic contents
+* Pageable and sortable search for articles in section or in category 
+* Search and getting articles, categories and sections are performed regarding locale
 
 Status
 ------
