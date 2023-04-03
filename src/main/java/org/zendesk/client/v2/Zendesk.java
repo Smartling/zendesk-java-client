@@ -40,7 +40,6 @@ import org.zendesk.client.v2.model.Metric;
 import org.zendesk.client.v2.model.Organization;
 import org.zendesk.client.v2.model.OrganizationField;
 import org.zendesk.client.v2.model.OrganizationMembership;
-import org.zendesk.client.v2.model.Page;
 import org.zendesk.client.v2.model.SatisfactionRating;
 import org.zendesk.client.v2.model.SearchResultEntity;
 import org.zendesk.client.v2.model.SortOrder;
@@ -2349,7 +2348,7 @@ public class Zendesk implements Closeable {
                                 .set("page", page)
                                 .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
-                                .set("sort_order", sorting.getSortOrder())
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
                 ),
                 handleList(Article.class, "articles")));
     }
@@ -2363,7 +2362,7 @@ public class Zendesk implements Closeable {
                                 .set("page", page)
                                 .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
-                                .set("sort_order", sorting.getSortOrder())
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
                 ),
                 handleList(Article.class, "articles")));
     }
@@ -2377,7 +2376,7 @@ public class Zendesk implements Closeable {
                                 .set("page", page)
                                 .set("per_page", perPage)
                                 .set("sort_by", sorting.getSortBy())
-                                .set("sort_order", sorting.getSortOrder())
+                                .set("sort_order", sorting.getSortOrder().getQueryParameter())
                 ),
                 handleList(Article.class, "articles")));
     }
