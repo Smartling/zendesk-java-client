@@ -2606,7 +2606,7 @@ public class Zendesk implements Closeable {
     }
 
     public Section getSection(String locale, long id) {
-        return complete(submit(req("GET", tmpl("/help_center/{locale}/sections/{sectionId}.json").set("id", id).set("locale", locale)),
+        return complete(submit(req("GET", tmpl("/help_center/{locale}/sections/{id}.json").set("id", id).set("locale", locale)),
                 handle(Section.class, "section")));
     }
 
