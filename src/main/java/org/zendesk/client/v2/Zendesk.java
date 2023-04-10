@@ -119,6 +119,7 @@ public class Zendesk implements Closeable {
     private final Map<String, String> headers;
     private final ObjectMapper mapper;
     private final Logger logger;
+    private final AsyncHttpClientLogger httpClientLogger;
     private boolean closed = false;
     private static final Map<String, Class<? extends SearchResultEntity>> searchResultTypes = searchResultTypes();
     private static final Map<String, Class<? extends Target>> targetTypes = targetTypes();
@@ -154,6 +155,7 @@ public class Zendesk implements Closeable {
 
     private Zendesk(AsyncHttpClient client, String url, String username, String password, Map<String, String> headers) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
+        this.httpClientLogger = new AsyncHttpClientLogger(this.logger);
         this.closeClient = client == null;
         this.oauthToken = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
@@ -176,6 +178,7 @@ public class Zendesk implements Closeable {
 
     private Zendesk(AsyncHttpClient client, String url, String oauthToken, Map<String, String> headers) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
+        this.httpClientLogger = new AsyncHttpClientLogger(this.logger);
         this.closeClient = client == null;
         this.realm = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
@@ -2729,16 +2732,7 @@ public class Zendesk implements Closeable {
     }
 
     private <T> ListenableFuture<T> submit(Request request, ZendeskAsyncCompletionHandler<T> handler) {
-        if (logger.isDebugEnabled()) {
-            if (request.getStringData() != null) {
-                logger.debug("Request {} {}\n{}", request.getMethod(), request.getUrl(), request.getStringData());
-            } else if (request.getByteData() != null) {
-                logger.debug("Request {} {} {} {} bytes", request.getMethod(), request.getUrl(),
-                        request.getHeaders().get("Content-type"), request.getByteData().length);
-            } else {
-                logger.debug("Request {} {}", request.getMethod(), request.getUrl());
-            }
-        }
+        httpClientLogger.logRequest(request);
         return client.executeRequest(request, handler);
     }
 
@@ -3092,13 +3086,7 @@ public class Zendesk implements Closeable {
     }
 
     private void logResponse(Response response) throws IOException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Response HTTP/{} {}\n{}", response.getStatusCode(), response.getStatusText(),
-                    response.getResponseBody());
-        }
-        if (logger.isTraceEnabled()) {
-            logger.trace("Response headers {}", response.getHeaders());
-        }
+        httpClientLogger.logResponse(response);
     }
 
     private static final String UTF_8 = "UTF-8";
