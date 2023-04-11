@@ -15,6 +15,9 @@ import static io.netty.handler.codec.http.HttpHeaders.Names.AUTHORIZATION;
 
 public class AsyncHttpClientLogger
 {
+    public static final String BODY_LENGTH = "bodyLength";
+    public static final String URL = "url";
+    public static final String DIRECTION = "direction";
     private final Logger logger;
 
     public AsyncHttpClientLogger(Logger logger)
@@ -31,19 +34,20 @@ public class AsyncHttpClientLogger
             {
                 message.format("{} --->%n{} {}%n");
                 requestArguments.add(StructuredArguments.value("method", request.getMethod()));
-                requestArguments.add(StructuredArguments.value("url", request.getUrl()));
+                requestArguments.add(StructuredArguments.value(URL, request.getUrl()));
 
-                requestArguments.add(StructuredArguments.value("direction", "request"));
+                requestArguments.add(StructuredArguments.value(DIRECTION, "request"));
 
                 logHeaders(request.getHeaders(), message);
 
                 if (request.getStringData() != null)
                 {
                     message.format("%n%s%n", request.getStringData());
-                    requestArguments.add(StructuredArguments.value("bodyLength", request.getStringData().length()));
+                    requestArguments.add(StructuredArguments.value(BODY_LENGTH, request.getStringData().length()));
                 } else if (request.getByteData() != null)
                 {
-                    requestArguments.add(StructuredArguments.value("bodyLength", request.getByteData().length));
+                    message.format("%n%s%n", new String(request.getByteData()));
+                    requestArguments.add(StructuredArguments.value(BODY_LENGTH, request.getByteData().length));
                     requestArguments.add(StructuredArguments.value("contentType", request.getHeaders().get("Content-type")));
                 }
 
@@ -59,29 +63,22 @@ public class AsyncHttpClientLogger
             List<StructuredArgument> responseArguments = new ArrayList<>();
             try (Formatter message = new Formatter())
             {
-                message.format("{} --->%n{} {}%n");
-//                responseArguments.add(StructuredArguments.value("method", response.getUri().ge));
-                responseArguments.add(StructuredArguments.value("url", response.getUri().toUrl()));
-
-                message.format("HTTP/1.1 {} {} ({}ms)%n");
+                message.format("{} {}%n");
+                responseArguments.add(StructuredArguments.value(URL, response.getUri().toUrl()));
                 responseArguments.add(StructuredArguments.value("status", response.getStatusCode()));
-//                responseArguments.add(StructuredArguments.value("elapsedTime", System.nanoTime() - startTime));
-                responseArguments.add(StructuredArguments.value("direction", "response"));
+
+                message.format("HTTP/1.1 {}%n");
+                responseArguments.add(StructuredArguments.value(DIRECTION, "response"));
 
                 logHeaders(response.getHeaders(), message);
 
                 if (response.getResponseBody() != null)
                 {
-                    message.format("%n");
-
-                    message.format("%s%n", response.getResponseBody());
-                    responseArguments.add(StructuredArguments.value("bodyLength", response.getResponseBody().length()));
-
-                    logger.trace(message.toString(), responseArguments.toArray());
-                } else
-                {
-                    logger.trace(message.toString(), responseArguments.toArray());
+                    message.format("%n%s%n", response.getResponseBody());
+                    responseArguments.add(StructuredArguments.value(BODY_LENGTH, response.getResponseBody().length()));
                 }
+
+                logger.trace(message.toString(), responseArguments.toArray());
             }
         }
 
