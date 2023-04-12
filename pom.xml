@@ -19,7 +19,7 @@
 
   <groupId>com.smartling.connector</groupId>
   <artifactId>zendesk-java-client</artifactId>
-  <version>0.21.2-SMT-SNAPSHOT</version>
+  <version>0.21.3-SMT-SNAPSHOT</version>
 
   <name>zendesk-java-client</name>
   <description>Java client for the Zendesk API</description>
@@ -82,6 +82,11 @@
       <groupId>com.damnhandy</groupId>
       <artifactId>handy-uri-templates</artifactId>
       <version>2.1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>net.logstash.logback</groupId>
+      <artifactId>logstash-logback-encoder</artifactId>
+      <version>7.2</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
