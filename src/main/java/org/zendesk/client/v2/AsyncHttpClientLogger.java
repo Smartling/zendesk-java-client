@@ -1,5 +1,7 @@
 package org.zendesk.client.v2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.codec.http.HttpHeaders;
 import net.logstash.logback.argument.StructuredArgument;
 import net.logstash.logback.argument.StructuredArguments;
@@ -12,6 +14,7 @@ import java.util.Formatter;
 import java.util.List;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.AUTHORIZATION;
+import static io.netty.handler.codec.http.HttpHeaders.Values.APPLICATION_JSON;
 
 public class AsyncHttpClientLogger
 {
@@ -19,10 +22,12 @@ public class AsyncHttpClientLogger
     public static final String URL = "url";
     public static final String DIRECTION = "direction";
     private final Logger logger;
+    private final ObjectMapper mapper;
 
-    public AsyncHttpClientLogger(Logger logger)
+    public AsyncHttpClientLogger(Logger logger, ObjectMapper mapper)
     {
         this.logger = logger;
+        this.mapper = mapper;
     }
 
     public void logRequest(Request request)
@@ -46,9 +51,12 @@ public class AsyncHttpClientLogger
                     requestArguments.add(StructuredArguments.value(BODY_LENGTH, request.getStringData().length()));
                 } else if (request.getByteData() != null)
                 {
-                    message.format("%n%s%n", new String(request.getByteData()));
+                    String contentType = request.getHeaders().get("Content-type");
+                    String body = new String(request.getByteData());
+
+                    message.format("%n%s%n", format(contentType, body));
                     requestArguments.add(StructuredArguments.value(BODY_LENGTH, request.getByteData().length));
-                    requestArguments.add(StructuredArguments.value("contentType", request.getHeaders().get("Content-type")));
+                    requestArguments.add(StructuredArguments.value("contentType", contentType));
                 }
 
                 logger.trace(message.toString(), requestArguments.toArray());
@@ -74,7 +82,8 @@ public class AsyncHttpClientLogger
 
                 if (response.getResponseBody() != null)
                 {
-                    message.format("%n%s%n", response.getResponseBody());
+                    String contentType = response.getHeaders().get("Content-type");
+                    message.format("%n%s%n", format(contentType, response.getResponseBody()));
                     responseArguments.add(StructuredArguments.value(BODY_LENGTH, response.getResponseBody().length()));
                 }
 
@@ -83,6 +92,27 @@ public class AsyncHttpClientLogger
         }
 
         return response;
+    }
+
+    private String format(String contentType, String body)
+    {
+        String result;
+        if (contentType != null && contentType.toLowerCase().contains(APPLICATION_JSON))
+        {
+            try
+            {
+                result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(body);
+            }
+            catch (JsonProcessingException e)
+            {
+                logger.warn("Enable to format json string {}", body);
+                result = body;
+            }
+        } else
+        {
+            result = body;
+        }
+        return result;
     }
 
     private void logHeaders(HttpHeaders headers, Formatter message)

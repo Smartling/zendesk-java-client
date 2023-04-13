@@ -155,7 +155,6 @@ public class Zendesk implements Closeable {
 
     private Zendesk(AsyncHttpClient client, String url, String username, String password, Map<String, String> headers) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
-        this.httpClientLogger = new AsyncHttpClientLogger(this.logger);
         this.closeClient = client == null;
         this.oauthToken = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
@@ -173,12 +172,12 @@ public class Zendesk implements Closeable {
         }
         this.headers = Collections.unmodifiableMap(headers);
         this.mapper = createMapper();
+        this.httpClientLogger = new AsyncHttpClientLogger(this.logger, this.mapper);
     }
 
 
     private Zendesk(AsyncHttpClient client, String url, String oauthToken, Map<String, String> headers) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
-        this.httpClientLogger = new AsyncHttpClientLogger(this.logger);
         this.closeClient = client == null;
         this.realm = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
@@ -191,6 +190,7 @@ public class Zendesk implements Closeable {
         this.headers = Collections.unmodifiableMap(headers);
 
         this.mapper = createMapper();
+        this.httpClientLogger = new AsyncHttpClientLogger(this.logger, this.mapper);
     }
 
 
