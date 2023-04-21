@@ -1,5 +1,7 @@
 package org.zendesk.client.v2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.handler.codec.http.HttpHeaders;
 import net.logstash.logback.argument.StructuredArgument;
 import net.logstash.logback.argument.StructuredArguments;
@@ -12,17 +14,24 @@ import java.util.Formatter;
 import java.util.List;
 
 import static io.netty.handler.codec.http.HttpHeaders.Names.AUTHORIZATION;
+import static io.netty.handler.codec.http.HttpHeaders.Values.APPLICATION_JSON;
 
 public class AsyncHttpClientLogger
 {
     public static final String BODY_LENGTH = "bodyLength";
     public static final String URL = "url";
     public static final String DIRECTION = "direction";
-    private final Logger logger;
+    public static final String PROJECT_ID = "projectId";
 
-    public AsyncHttpClientLogger(Logger logger)
+    private final Logger logger;
+    private final ObjectMapper mapper;
+    private final String projectId;
+
+    public AsyncHttpClientLogger(Logger logger, ObjectMapper mapper, String projectId)
     {
         this.logger = logger;
+        this.mapper = mapper;
+        this.projectId = projectId;
     }
 
     public void logRequest(Request request)
@@ -39,6 +48,7 @@ public class AsyncHttpClientLogger
                 requestArguments.add(StructuredArguments.value(DIRECTION, "request"));
 
                 logHeaders(request.getHeaders(), message);
+                requestArguments.add(StructuredArguments.value(PROJECT_ID, projectId));
 
                 if (request.getStringData() != null)
                 {
@@ -46,9 +56,12 @@ public class AsyncHttpClientLogger
                     requestArguments.add(StructuredArguments.value(BODY_LENGTH, request.getStringData().length()));
                 } else if (request.getByteData() != null)
                 {
-                    message.format("%n%s%n", new String(request.getByteData()));
+                    String contentType = request.getHeaders().get("Content-type");
+                    String body = new String(request.getByteData());
+
+                    message.format("%n%s%n", format(contentType, body));
                     requestArguments.add(StructuredArguments.value(BODY_LENGTH, request.getByteData().length));
-                    requestArguments.add(StructuredArguments.value("contentType", request.getHeaders().get("Content-type")));
+                    requestArguments.add(StructuredArguments.value("contentType", contentType));
                 }
 
                 logger.trace(message.toString(), requestArguments.toArray());
@@ -71,10 +84,12 @@ public class AsyncHttpClientLogger
                 responseArguments.add(StructuredArguments.value(DIRECTION, "response"));
 
                 logHeaders(response.getHeaders(), message);
+                responseArguments.add(StructuredArguments.value(PROJECT_ID, projectId));
 
                 if (response.getResponseBody() != null)
                 {
-                    message.format("%n%s%n", response.getResponseBody());
+                    String contentType = response.getHeaders().get("Content-type");
+                    message.format("%n%s%n", format(contentType, response.getResponseBody()));
                     responseArguments.add(StructuredArguments.value(BODY_LENGTH, response.getResponseBody().length()));
                 }
 
@@ -83,6 +98,28 @@ public class AsyncHttpClientLogger
         }
 
         return response;
+    }
+
+    private String format(String contentType, String body)
+    {
+        String result;
+        if (contentType != null && contentType.toLowerCase().contains(APPLICATION_JSON))
+        {
+            try
+            {
+                Object obj = mapper.readValue(body, Object.class);
+                result = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+            }
+            catch (JsonProcessingException e)
+            {
+                logger.warn("Unable to format json string {}", body);
+                result = body;
+            }
+        } else
+        {
+            result = body;
+        }
+        return result;
     }
 
     private void logHeaders(HttpHeaders headers, Formatter message)

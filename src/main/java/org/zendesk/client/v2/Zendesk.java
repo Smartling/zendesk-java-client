@@ -153,9 +153,8 @@ public class Zendesk implements Closeable {
        return Collections.unmodifiableMap(result);
     }
 
-    private Zendesk(AsyncHttpClient client, String url, String username, String password, Map<String, String> headers) {
+    private Zendesk(AsyncHttpClient client, String url, String username, String password, Map<String, String> headers, String projectId) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
-        this.httpClientLogger = new AsyncHttpClientLogger(this.logger);
         this.closeClient = client == null;
         this.oauthToken = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
@@ -173,12 +172,12 @@ public class Zendesk implements Closeable {
         }
         this.headers = Collections.unmodifiableMap(headers);
         this.mapper = createMapper();
+        this.httpClientLogger = new AsyncHttpClientLogger(this.logger, this.mapper, projectId);
     }
 
 
-    private Zendesk(AsyncHttpClient client, String url, String oauthToken, Map<String, String> headers) {
+    private Zendesk(AsyncHttpClient client, String url, String oauthToken, Map<String, String> headers, String projectId) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
-        this.httpClientLogger = new AsyncHttpClientLogger(this.logger);
         this.closeClient = client == null;
         this.realm = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
@@ -191,6 +190,7 @@ public class Zendesk implements Closeable {
         this.headers = Collections.unmodifiableMap(headers);
 
         this.mapper = createMapper();
+        this.httpClientLogger = new AsyncHttpClientLogger(this.logger, this.mapper, projectId);
     }
 
 
@@ -3469,6 +3469,7 @@ public class Zendesk implements Closeable {
         private String password = null;
         private String token = null;
         private String oauthToken = null;
+        private String projectId = null;
         private final Map<String, String> headers;
 
         public Builder(String url) {
@@ -3514,6 +3515,10 @@ public class Zendesk implements Closeable {
             return this;
         }
 
+        public Builder setProjectId(String projectId) {
+            this.projectId = projectId;
+            return this;
+        }
 
         public Builder setRetry(boolean retry) {
             return this;
@@ -3528,11 +3533,11 @@ public class Zendesk implements Closeable {
 
         public Zendesk build() {
             if (token != null) {
-                return new Zendesk(client, url, username + "/token", token, headers);
+                return new Zendesk(client, url, username + "/token", token, headers, projectId);
             } else if (oauthToken != null) {
-                return new Zendesk(client, url, oauthToken, headers);
+                return new Zendesk(client, url, oauthToken, headers, projectId);
             }
-            return new Zendesk(client, url, username, password, headers);
+            return new Zendesk(client, url, username, password, headers, projectId);
         }
     }
 }
