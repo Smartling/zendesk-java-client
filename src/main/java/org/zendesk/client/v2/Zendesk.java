@@ -102,6 +102,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author stephenc
@@ -3115,7 +3116,7 @@ public class Zendesk implements Closeable {
     // Static helper methods
     //////////////////////////////////////////////////////////////////////
 
-    private static <T> T complete(ListenableFuture<T> future) {
+    static <T> T complete(ListenableFuture<T> future) {
         try {
             return future.get();
         } catch (InterruptedException e) {
@@ -3129,6 +3130,12 @@ public class Zendesk implements Closeable {
                     throw new ZendeskResponseException((ZendeskResponseException)e.getCause());
                 }
                 throw new ZendeskException(e.getCause());
+            }
+            if (e.getCause() instanceof TimeoutException
+                    && e.getCause().getMessage() != null
+                    && (e.getCause().getMessage().startsWith("Request timeout to")
+                    || e.getCause().getMessage().startsWith("Read timeout to"))) {
+                throw new ZendeskTimeoutException(e.getCause());
             }
             throw new ZendeskException(e.getMessage(), e);
         }
