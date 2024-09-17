@@ -71,6 +71,7 @@ import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.hc.Subscription;
 import org.zendesk.client.v2.model.hc.Translation;
 import org.zendesk.client.v2.model.hc.UserSegment;
+import org.zendesk.client.v2.model.media.MediaResponse;
 import org.zendesk.client.v2.model.oauth.OAuthRequest;
 import org.zendesk.client.v2.model.oauth.OAuthToken;
 import org.zendesk.client.v2.model.schedules.Holiday;
@@ -103,6 +104,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static org.zendesk.client.v2.model.SortOrder.DESCENDING;
 
 /**
  * @author stephenc
@@ -2476,6 +2479,18 @@ public class Zendesk implements Closeable {
                 handleStatus()));
     }
 
+    public ArticleAttachments createArticleAttachment(Long articleId, boolean inline, String guideMediaId, String locale) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("inline", inline);
+        request.put("guide_media_id", guideMediaId);
+        request.put("locale", locale);
+
+        TemplateUri tmpl = tmpl("/help_center/articles/{articleId}/attachments")
+                .set("articleId", articleId);
+
+        return complete(submit(req("POST", tmpl, JSON, json(request)), handle(ArticleAttachments.class, "article_attachment")));
+    }
+
     /**
      * Delete attachment from article.
      * @param attachment
@@ -2718,6 +2733,19 @@ public class Zendesk implements Closeable {
         return complete(submit(req("GET",
             tmpl("/business_hours/schedules/{id}/holidays.json").set("id", scheduleId)),
             handleList(Holiday.class, "holidays")));
+    }
+
+    public MediaResponse getGuideMedias(Map<String, Object> filterParameters, String pageAfter, int perPage, Sorting sorting) {
+        Map<String, Object> pageParameters = new HashMap<>();
+        pageParameters.put("after", pageAfter);
+        pageParameters.put("size", perPage);
+
+        TemplateUri tmpl = tmpl("/guide/medias{?filter*,page*,sort}")
+                .setGroupParameters("filter", filterParameters)
+                .setGroupParameters("page", pageParameters)
+                .set("sort", sorting.getSortOrder() == DESCENDING ? "-" + sorting.getSortBy() : sorting.getSortBy());
+
+        return complete(submit(req("GET", tmpl), handle(MediaResponse.class)));
     }
 
     //////////////////////////////////////////////////////////////////////

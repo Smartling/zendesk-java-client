@@ -2,8 +2,10 @@ package org.zendesk.client.v2;
 
 import com.damnhandy.uri.template.UriTemplate;
 
+import java.util.AbstractMap;
 import java.util.Date;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author stephenc
@@ -33,6 +35,14 @@ class TemplateUri extends Uri {
 
     public TemplateUri set(String variableName, Object value) {
         uri.set(variableName, value);
+        return this;
+    }
+
+    public TemplateUri setGroupParameters(String group, Map<String, Object> parameters) {
+        Map<String, Object> groupParameters = parameters.entrySet().stream()
+                .map(entry -> new AbstractMap.SimpleEntry<>(String.format("%s[%s]", group, entry.getKey()), entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        uri.set(group, groupParameters);
         return this;
     }
 
