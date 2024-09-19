@@ -30,7 +30,6 @@ import org.zendesk.client.v2.model.JobResult;
 import org.zendesk.client.v2.model.JobStatus;
 import org.zendesk.client.v2.model.Organization;
 import org.zendesk.client.v2.model.OrganizationMembership;
-import org.zendesk.client.v2.model.Page;
 import org.zendesk.client.v2.model.Priority;
 import org.zendesk.client.v2.model.Request;
 import org.zendesk.client.v2.model.Role;
@@ -58,6 +57,7 @@ import org.zendesk.client.v2.model.hc.PermissionGroup;
 import org.zendesk.client.v2.model.hc.Section;
 import org.zendesk.client.v2.model.hc.Subscription;
 import org.zendesk.client.v2.model.hc.Translation;
+import org.zendesk.client.v2.model.media.MediaResponse;
 import org.zendesk.client.v2.model.schedules.Holiday;
 import org.zendesk.client.v2.model.schedules.Interval;
 import org.zendesk.client.v2.model.schedules.Schedule;
@@ -83,6 +83,8 @@ import java.util.stream.StreamSupport;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -107,7 +109,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeNoException;
 import static org.junit.Assume.assumeNotNull;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeThat;
 import static org.junit.Assume.assumeTrue;
 import static org.zendesk.client.v2.model.SortOrder.ASCENDING;
@@ -2588,6 +2589,39 @@ public class RealSmokeTest {
         List<ArticleAttachments> attachments = instance.getAttachmentsFromArticle("en-us", existingArticle.getId());
 
         assertNotNull(attachments);
+    }
+
+    @Test
+    public void shouldReturnGuideMedias()
+    {
+        int butterflyMedias = instance.getGuideMedias(singletonMap("name", "butterfly"), "", 30, new Sorting("updated", DESCENDING)).getRecords().size();
+        assumeThat("need specific number of butterfly medias on instance", butterflyMedias, is(4));
+
+        MediaResponse medias1 = instance.getGuideMedias(singletonMap("name", "butterfly"), "", 2, new Sorting("updated", DESCENDING));
+        assertThat(medias1.getMeta().hasMore(), is(true));
+        assertThat(medias1.getRecords(), hasSize(2));
+
+        MediaResponse medias2 = instance.getGuideMedias(singletonMap("name", "butterfly"), medias1.getMeta().getAfterCursor(), 1, new Sorting("updated", DESCENDING));
+        assertThat(medias2.getMeta().hasMore(), is(false));
+        assertThat(medias2.getRecords(), hasSize(1));
+    }
+
+    @Test
+    public void shouldCreateArticleAttachment()
+    {
+        Long articleId = 33484195670035L;
+        assumeThat("need specific asset on instance", instance.getArticle("fr", 33484195670035L), notNullValue());
+
+        MediaResponse media = instance.getGuideMedias(emptyMap(), "", 1, new Sorting("updated", DESCENDING));
+
+        int attachmentsBefore = instance.getAttachmentsFromArticle("fr", articleId).size();
+
+        ArticleAttachments articleAttachment = instance.createArticleAttachment(articleId, true, media.getRecords().get(0).getId(), "fr");
+
+        int attachmentsAfter = instance.getAttachmentsFromArticle("fr", articleId).size();
+        assertThat(attachmentsAfter, is(attachmentsBefore + 1));
+
+        instance.deleteArticleAttachment(articleAttachment);
     }
 
     @Test

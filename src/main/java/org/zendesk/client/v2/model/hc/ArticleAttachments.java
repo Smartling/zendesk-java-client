@@ -21,10 +21,13 @@ public class ArticleAttachments {
      */
     private Long articleId;
 
+    private String displayFileName;
     /**
      *  The name of the file
      */
     private String fileName;
+
+    private String locale;
 
     /**
      *  A full URL where the attachment file can be downloaded
@@ -83,6 +86,15 @@ public class ArticleAttachments {
         this.articleId = articleId;
     }
 
+    @JsonProperty("display_file_name")
+    public String getDisplayFileName() {
+        return displayFileName;
+    }
+
+    public void setDisplayFileName(String displayFileName) {
+        this.displayFileName = displayFileName;
+    }
+
     @JsonProperty("file_name")
     public String getFileName() {
         return fileName;
@@ -90,6 +102,16 @@ public class ArticleAttachments {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getLocale()
+    {
+        return locale;
+    }
+
+    public void setLocale(String locale)
+    {
+        this.locale = locale;
     }
 
     @JsonProperty("content_url")
@@ -151,7 +173,9 @@ public class ArticleAttachments {
                 "id=" + id +
                 ", url='" + url + '\'' +
                 ", articleId=" + articleId +
+                ", displayFileName='" + displayFileName + '\'' +
                 ", fileName='" + fileName + '\'' +
+                ", locale='" + locale + '\'' +
                 ", contentUrl='" + contentUrl + '\'' +
                 ", contentType='" + contentType + '\'' +
                 ", size=" + size +

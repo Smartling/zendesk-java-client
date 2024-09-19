@@ -5,7 +5,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.zendesk.client.v2.junit.UTCRule;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public class TemplateUriTest {
     }
 
     @Test
-    public void testDateValue() throws ParseException {
+    public void testDateValue() {
         TemplateUri templateUri = new TemplateUri("/test?date={foo}");
 
         Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -62,5 +61,14 @@ public class TemplateUriTest {
         templateUri.set("foo", cal.getTime());
 
         assertEquals("/test?date=2018-04-20T16%3A20%3A00.000%2B0000", templateUri.toString());
+    }
+
+    @Test
+    public void testGroupParameters() {
+        TemplateUri templateUri = new TemplateUri("/test{?group*,x}");
+        templateUri.set("x", "123");
+        templateUri.setGroupParameters("group", new HashMap<String, Object>() {{ put("aaa", 1); put("bbb", "bValue"); }});
+
+        assertEquals("/test?group%5Bbbb%5D=bValue&group%5Baaa%5D=1&x=123", templateUri.toString());
     }
 }
