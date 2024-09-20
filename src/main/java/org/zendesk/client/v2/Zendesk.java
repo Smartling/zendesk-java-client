@@ -2735,9 +2735,9 @@ public class Zendesk implements Closeable {
             handleList(Holiday.class, "holidays")));
     }
 
-    public MediaResponse getGuideMedias(Map<String, Object> filterParameters, String pageAfter, int perPage, Sorting sorting) {
+    public MediaResponse getGuideMedias(Map<String, Object> filterParameters, String afterCursor, int perPage, Sorting sorting) {
         Map<String, Object> pageParameters = new HashMap<>();
-        pageParameters.put("after", pageAfter);
+        pageParameters.put("after", afterCursor);
         pageParameters.put("size", perPage);
 
         TemplateUri tmpl = tmpl("/guide/medias{?filter*,page*,sort}")

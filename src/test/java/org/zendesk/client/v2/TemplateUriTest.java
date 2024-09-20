@@ -8,6 +8,7 @@ import org.zendesk.client.v2.junit.UTCRule;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -67,8 +68,12 @@ public class TemplateUriTest {
     public void testGroupParameters() {
         TemplateUri templateUri = new TemplateUri("/test{?group*,x}");
         templateUri.set("x", "123");
-        templateUri.setGroupParameters("group", new HashMap<String, Object>() {{ put("aaa", 1); put("bbb", "bValue"); }});
+        templateUri.setGroupParameters("group", new LinkedHashMap<String, Object>() {{
+            put("aaa", 1);
+            put("bbb", "bValue");
+            put("ccc", null);
+        }});
 
-        assertEquals("/test?group%5Bbbb%5D=bValue&group%5Baaa%5D=1&x=123", templateUri.toString());
+        assertEquals("/test?group%5Baaa%5D=1&group%5Bbbb%5D=bValue&x=123", templateUri.toString());
     }
 }

@@ -100,6 +100,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.isOneOf;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertEquals;
@@ -2594,16 +2595,16 @@ public class RealSmokeTest {
     @Test
     public void shouldReturnGuideMedias()
     {
-        int butterflyMedias = instance.getGuideMedias(singletonMap("name", "butterfly"), "", 30, new Sorting("updated", DESCENDING)).getRecords().size();
-        assumeThat("need specific number of butterfly medias on instance", butterflyMedias, is(4));
+        int butterflyMedias = instance.getGuideMedias(singletonMap("name", "butterfly"), null, 30, new Sorting("updated", DESCENDING)).getRecords().size();
+        assumeThat("need specific number of butterfly medias on instance", butterflyMedias, Matchers.both(greaterThan(2)).and(lessThan(25)));
 
-        MediaResponse medias1 = instance.getGuideMedias(singletonMap("name", "butterfly"), "", 2, new Sorting("updated", DESCENDING));
+        MediaResponse medias1 = instance.getGuideMedias(singletonMap("name", "butterfly"), null, 2, new Sorting("updated", DESCENDING));
         assertThat(medias1.getMeta().hasMore(), is(true));
         assertThat(medias1.getRecords(), hasSize(2));
 
-        MediaResponse medias2 = instance.getGuideMedias(singletonMap("name", "butterfly"), medias1.getMeta().getAfterCursor(), 1, new Sorting("updated", DESCENDING));
+        MediaResponse medias2 = instance.getGuideMedias(singletonMap("name", "butterfly"), medias1.getMeta().getAfterCursor(), 30, new Sorting("updated", DESCENDING));
         assertThat(medias2.getMeta().hasMore(), is(false));
-        assertThat(medias2.getRecords(), hasSize(1));
+        assertThat(medias2.getRecords(), hasSize(butterflyMedias - 2));
     }
 
     @Test
