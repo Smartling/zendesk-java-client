@@ -119,7 +119,7 @@ public class Zendesk implements Closeable {
     private final AsyncHttpClient client;
     private final Realm realm;
     private final String url;
-    private final String oauthToken;
+    private final AccessTokenProvider accessTokenProvider;
     private final Map<String, String> headers;
     private final ObjectMapper mapper;
     private final Logger logger;
@@ -160,7 +160,7 @@ public class Zendesk implements Closeable {
     private Zendesk(AsyncHttpClient client, String url, String username, String password, Map<String, String> headers, String projectId) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
         this.closeClient = client == null;
-        this.oauthToken = null;
+        this.accessTokenProvider = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
         this.url = url.endsWith("/") ? url + "api/v2" : url + "/api/v2";
         if (username != null) {
@@ -180,14 +180,14 @@ public class Zendesk implements Closeable {
     }
 
 
-    private Zendesk(AsyncHttpClient client, String url, String oauthToken, Map<String, String> headers, String projectId) {
+    private Zendesk(AsyncHttpClient client, String url, AccessTokenProvider accessTokenProvider, Map<String, String> headers, String projectId) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
         this.closeClient = client == null;
         this.realm = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
         this.url = url.endsWith("/") ? url + "api/v2" : url + "/api/v2";
-        if (oauthToken != null) {
-            this.oauthToken = oauthToken;
+        if (accessTokenProvider != null) {
+            this.accessTokenProvider = accessTokenProvider;
         } else {
             throw new IllegalStateException("Cannot specify token or password without specifying username");
         }
@@ -2796,7 +2796,7 @@ public class Zendesk implements Closeable {
         if (realm != null) {
             builder.setRealm(realm);
         } else {
-            builder.addHeader("Authorization", "Bearer " + oauthToken);
+            builder.addHeader("Authorization", "Bearer " + accessTokenProvider.accessToken());
         }
         headers.forEach(builder::setHeader);
         return builder.setUrl(url);
@@ -3503,7 +3503,7 @@ public class Zendesk implements Closeable {
         private String username = null;
         private String password = null;
         private String token = null;
-        private String oauthToken = null;
+        private AccessTokenProvider accessTokenProvider = null;
         private String projectId = null;
         private final Map<String, String> headers;
 
@@ -3526,7 +3526,7 @@ public class Zendesk implements Closeable {
             this.password = password;
             if (password != null) {
                 this.token = null;
-                this.oauthToken = null;
+                this.accessTokenProvider = null;
             }
             return this;
         }
@@ -3535,15 +3535,19 @@ public class Zendesk implements Closeable {
             this.token = token;
             if (token != null) {
                 this.password = null;
-                this.oauthToken = null;
+                this.accessTokenProvider = null;
             }
             return this;
         }
 
-
+        @Deprecated
         public Builder setOauthToken(String oauthToken) {
-            this.oauthToken = oauthToken;
-            if (oauthToken != null) {
+            return setAccessTokenProvider(() -> oauthToken);
+        }
+
+        public Builder setAccessTokenProvider(AccessTokenProvider accessTokenProvider) {
+            this.accessTokenProvider = accessTokenProvider;
+            if (this.accessTokenProvider != null) {
                 this.password = null;
                 this.token = null;
             }
@@ -3569,8 +3573,8 @@ public class Zendesk implements Closeable {
         public Zendesk build() {
             if (token != null) {
                 return new Zendesk(client, url, username + "/token", token, headers, projectId);
-            } else if (oauthToken != null) {
-                return new Zendesk(client, url, oauthToken, headers, projectId);
+            } else if (accessTokenProvider != null) {
+                return new Zendesk(client, url, accessTokenProvider, headers, projectId);
             }
             return new Zendesk(client, url, username, password, headers, projectId);
         }
