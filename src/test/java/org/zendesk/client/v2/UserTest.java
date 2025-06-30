@@ -1,5 +1,13 @@
 package org.zendesk.client.v2;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.Test;
+import org.zendesk.client.v2.model.User;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -9,73 +17,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.put;
 import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.netty.handler.codec.http.HttpHeaders.Values.APPLICATION_JSON;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
-
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.text.RandomStringGenerator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.zendesk.client.v2.model.User;
 
 /**
  * An initial attempt at a unit test that uses wiremock to test the client without requiring a running zendesk client
  * @author rbolles on 2/8/18.
  */
-public class UserTest {
-
-    private static final String MOCK_URL_FORMATTED_STRING = "http://localhost:%d";
-    public static final RandomStringGenerator RANDOM_STRING_GENERATOR =
-            new RandomStringGenerator.Builder().withinRange('a', 'z').build();
-    private static final String MOCK_API_TOKEN = RANDOM_STRING_GENERATOR.generate(15);
-    private static final String MOCK_USERNAME = RANDOM_STRING_GENERATOR.generate(10).toLowerCase() + "@cloudbees.com";
-
-    @ClassRule
-    public static WireMockClassRule zendeskApiClass = new WireMockClassRule(options()
-            .dynamicPort()
-            .dynamicHttpsPort()
-    );
-
-    @Rule
-    public WireMockClassRule zendeskApiMock = zendeskApiClass;
-
-    private Zendesk client;
-    //use a mapper that is identical to what the client will use
-    private ObjectMapper objectMapper = Zendesk.createMapper();
-
-
-    @Before
-    public void setUp() throws Exception {
-        int ephemeralPort = zendeskApiMock.port();
-
-        String hostname = String.format(MOCK_URL_FORMATTED_STRING, ephemeralPort);
-
-        client = new Zendesk.Builder(hostname)
-                .setUsername(MOCK_USERNAME)
-                .setToken(MOCK_API_TOKEN)
-                .build();
-    }
-
-    @After
-    public void closeClient() {
-        if (client != null) {
-            client.close();
-        }
-        client = null;
-    }
-
+public class UserTest extends BaseWiremockTest {
 
     @Test
     public void mergeUsers() throws JsonProcessingException {
