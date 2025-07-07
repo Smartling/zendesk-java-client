@@ -30,47 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * An initial attempt at a unit test that uses wiremock to test the client without requiring a running zendesk client
  * @author rbolles on 2/8/18.
  */
-public class SearchTest {
-
-    private static final String MOCK_URL_FORMATTED_STRING = "http://localhost:%d";
-    public static final RandomStringGenerator RANDOM_STRING_GENERATOR =
-            new RandomStringGenerator.Builder().withinRange('a', 'z').build();
-    private static final String MOCK_API_TOKEN = RANDOM_STRING_GENERATOR.generate(15);
-    private static final String MOCK_USERNAME = RANDOM_STRING_GENERATOR.generate(10).toLowerCase() + "@cloudbees.com";
-
-    @ClassRule
-    public static WireMockClassRule zendeskApiClass = new WireMockClassRule(options()
-            .dynamicPort()
-            .dynamicHttpsPort()
-    );
-
-    @Rule
-    public WireMockClassRule zendeskApiMock = zendeskApiClass;
-
-    private Zendesk client;
-    //use a mapper that is identical to what the client will use
-    private ObjectMapper objectMapper = Zendesk.createMapper();
-
-
-    @Before
-    public void setUp() throws Exception {
-        int ephemeralPort = zendeskApiMock.port();
-
-        String hostname = String.format(MOCK_URL_FORMATTED_STRING, ephemeralPort);
-
-        client = new Zendesk.Builder(hostname)
-                .setUsername(MOCK_USERNAME)
-                .setToken(MOCK_API_TOKEN)
-                .build();
-    }
-
-    @After
-    public void closeClient() {
-        if (client != null) {
-            client.close();
-        }
-        client = null;
-    }
+public class SearchTest extends BaseWiremockTest {
 
     @Test
     public void getSearchResults_Sorting() throws JsonProcessingException, UnsupportedEncodingException {

@@ -72,8 +72,9 @@ import org.zendesk.client.v2.model.hc.Subscription;
 import org.zendesk.client.v2.model.hc.Translation;
 import org.zendesk.client.v2.model.hc.UserSegment;
 import org.zendesk.client.v2.model.media.MediaResponse;
-import org.zendesk.client.v2.model.oauth.OAuthRequest;
+import org.zendesk.client.v2.model.oauth.AccessTokenRequest;
 import org.zendesk.client.v2.model.oauth.OAuthToken;
+import org.zendesk.client.v2.model.oauth.RefreshTokenRequest;
 import org.zendesk.client.v2.model.schedules.Holiday;
 import org.zendesk.client.v2.model.schedules.Schedule;
 import org.zendesk.client.v2.model.targets.BasecampTarget;
@@ -112,14 +113,21 @@ import static org.zendesk.client.v2.model.SortOrder.DESCENDING;
  * @since 04/04/2013 13:08
  */
 public class Zendesk implements Closeable {
+    public static final Integer ACCESS_TOKEN_EXPIRES_IN_MIN = 5 * 60;
+    public static final Integer ACCESS_TOKEN_EXPIRES_IN_MAX = 2 * 24 * 60 * 60;
+    public static final Integer REFRESH_TOKEN_EXPIRES_IN_MIN = 7 * 24 * 60 * 60;
+    public static final Integer REFRESH_TOKEN_EXPIRES_IN_DEFAULT = 30 * 24 * 60 * 60;
+    public static final Integer REFRESH_TOKEN_EXPIRES_IN_MAX = 90 * 24 * 60 * 60;
+
     private static final String JSON = "application/json; charset=UTF-8";
     private static final DefaultAsyncHttpClientConfig DEFAULT_ASYNC_HTTP_CLIENT_CONFIG =
             new DefaultAsyncHttpClientConfig.Builder().setFollowRedirect(true).build();
     private final boolean closeClient;
     private final AsyncHttpClient client;
     private final Realm realm;
-    private final String url;
-    private final String oauthToken;
+    private final String tokensUrl;
+    private final String apiUrl;
+    private final AccessTokenProvider accessTokenProvider;
     private final Map<String, String> headers;
     private final ObjectMapper mapper;
     private final Logger logger;
@@ -160,9 +168,11 @@ public class Zendesk implements Closeable {
     private Zendesk(AsyncHttpClient client, String url, String username, String password, Map<String, String> headers, String projectId) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
         this.closeClient = client == null;
-        this.oauthToken = null;
+        this.accessTokenProvider = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
-        this.url = url.endsWith("/") ? url + "api/v2" : url + "/api/v2";
+        String normalizedUrl = url.replaceFirst("/$", "");
+        this.tokensUrl = normalizedUrl + "/oauth/tokens";
+        this.apiUrl = normalizedUrl + "/api/v2";
         if (username != null) {
             this.realm = new Realm.Builder(username, password)
                     .setScheme(Realm.AuthScheme.BASIC)
@@ -179,18 +189,18 @@ public class Zendesk implements Closeable {
         this.httpClientLogger = new AsyncHttpClientLogger(this.logger, this.mapper, projectId);
     }
 
-
-    private Zendesk(AsyncHttpClient client, String url, String oauthToken, Map<String, String> headers, String projectId) {
+    private Zendesk(AsyncHttpClient client, String url, AccessTokenProvider accessTokenProvider, Map<String, String> headers, String projectId) {
         this.logger = LoggerFactory.getLogger(Zendesk.class);
         this.closeClient = client == null;
         this.realm = null;
         this.client = client == null ? new DefaultAsyncHttpClient(DEFAULT_ASYNC_HTTP_CLIENT_CONFIG) : client;
-        this.url = url.endsWith("/") ? url + "api/v2" : url + "/api/v2";
-        if (oauthToken != null) {
-            this.oauthToken = oauthToken;
-        } else {
-            throw new IllegalStateException("Cannot specify token or password without specifying username");
+        String normalizedUrl = url.replaceFirst("/$", "");
+        this.tokensUrl = normalizedUrl + "/oauth/tokens";
+        this.apiUrl = normalizedUrl + "/api/v2";
+        if (accessTokenProvider == null) {
+            throw new IllegalStateException("accessTokenProvider is required");
         }
+        this.accessTokenProvider = accessTokenProvider;
         this.headers = Collections.unmodifiableMap(headers);
 
         this.mapper = createMapper();
@@ -221,11 +231,40 @@ public class Zendesk implements Closeable {
     // Action methods
     //////////////////////////////////////////////////////////////////////
 
+    @Deprecated
     public String getOAuthToken(String subdomain, String code, String redirectUri, String clientId, String clientSecret) {
-        return complete(submit(reqUnauthorized("POST", new TemplateUri("https://{subdomain}.zendesk.com/oauth/tokens").set("subdomain", subdomain),
-                JSON, json(new OAuthRequest(code, redirectUri, clientId, clientSecret))
-                ),
-                handle(OAuthToken.class))).getAccessToken();
+        return getOAuthToken(code, redirectUri, clientId, clientSecret, null, null, null).getAccessToken();
+    }
+
+    public OAuthToken getOAuthToken(
+            String code,
+            String redirectUri,
+            String clientId,
+            String clientSecret,
+            String scope,
+            Integer expiresIn,
+            Integer refreshTokenExpiresIn)
+    {
+        AccessTokenRequest accessTokenRequest = new AccessTokenRequest(code, redirectUri, clientId, clientSecret, scope, expiresIn, refreshTokenExpiresIn);
+        return complete(submit(
+                reqUnauthorized("POST", new FixedUri(tokensUrl), JSON, json(accessTokenRequest)),
+                handle(OAuthToken.class)
+        ));
+    }
+
+    public OAuthToken refreshOAuthToken(
+            String refreshToken,
+            String clientId,
+            String clientSecret,
+            String scope,
+            int expiresIn,
+            int refreshTokenExpiresIn)
+    {
+        RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest(refreshToken, clientId, clientSecret, scope, expiresIn, refreshTokenExpiresIn);
+        return complete(submit(
+                reqUnauthorized("POST", new FixedUri(tokensUrl), JSON, json(refreshTokenRequest)),
+                handle(OAuthToken.class)
+        ));
     }
 
     public JobStatus getJobStatus(JobStatus status) {
@@ -2796,7 +2835,7 @@ public class Zendesk implements Closeable {
         if (realm != null) {
             builder.setRealm(realm);
         } else {
-            builder.addHeader("Authorization", "Bearer " + oauthToken);
+            builder.addHeader("Authorization", "Bearer " + accessTokenProvider.accessToken());
         }
         headers.forEach(builder::setHeader);
         return builder.setUrl(url);
@@ -3107,11 +3146,11 @@ public class Zendesk implements Closeable {
     }
 
     private TemplateUri tmpl(String template) {
-        return new TemplateUri(url + template);
+        return new TemplateUri(apiUrl + template);
     }
 
     private Uri cnst(String template) {
-        return new FixedUri(url + template);
+        return new FixedUri(apiUrl + template);
     }
 
     private void logResponse(Response response) throws IOException {
@@ -3503,7 +3542,7 @@ public class Zendesk implements Closeable {
         private String username = null;
         private String password = null;
         private String token = null;
-        private String oauthToken = null;
+        private AccessTokenProvider accessTokenProvider = null;
         private String projectId = null;
         private final Map<String, String> headers;
 
@@ -3526,7 +3565,7 @@ public class Zendesk implements Closeable {
             this.password = password;
             if (password != null) {
                 this.token = null;
-                this.oauthToken = null;
+                this.accessTokenProvider = null;
             }
             return this;
         }
@@ -3535,15 +3574,19 @@ public class Zendesk implements Closeable {
             this.token = token;
             if (token != null) {
                 this.password = null;
-                this.oauthToken = null;
+                this.accessTokenProvider = null;
             }
             return this;
         }
 
-
+        @Deprecated
         public Builder setOauthToken(String oauthToken) {
-            this.oauthToken = oauthToken;
-            if (oauthToken != null) {
+            return setAccessTokenProvider(() -> oauthToken);
+        }
+
+        public Builder setAccessTokenProvider(AccessTokenProvider accessTokenProvider) {
+            this.accessTokenProvider = accessTokenProvider;
+            if (this.accessTokenProvider != null) {
                 this.password = null;
                 this.token = null;
             }
@@ -3569,8 +3612,8 @@ public class Zendesk implements Closeable {
         public Zendesk build() {
             if (token != null) {
                 return new Zendesk(client, url, username + "/token", token, headers, projectId);
-            } else if (oauthToken != null) {
-                return new Zendesk(client, url, oauthToken, headers, projectId);
+            } else if (accessTokenProvider != null) {
+                return new Zendesk(client, url, accessTokenProvider, headers, projectId);
             }
             return new Zendesk(client, url, username, password, headers, projectId);
         }

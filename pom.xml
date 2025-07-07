@@ -19,7 +19,7 @@
 
   <groupId>com.smartling.connector</groupId>
   <artifactId>zendesk-java-client</artifactId>
-  <version>0.21.6-SNAPSHOT</version>
+  <version>0.22.1-SNAPSHOT</version>
 
   <name>zendesk-java-client</name>
   <description>Java client for the Zendesk API</description>
@@ -68,7 +68,7 @@
     <dependency>
       <groupId>org.asynchttpclient</groupId>
       <artifactId>async-http-client</artifactId>
-      <version>2.12.3</version>
+      <version>2.12.4</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
