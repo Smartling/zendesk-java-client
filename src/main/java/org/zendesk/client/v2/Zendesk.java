@@ -21,45 +21,7 @@ import org.asynchttpclient.request.body.multipart.FilePart;
 import org.asynchttpclient.request.body.multipart.StringPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zendesk.client.v2.model.AgentRole;
-import org.zendesk.client.v2.model.Attachment;
-import org.zendesk.client.v2.model.Audit;
-import org.zendesk.client.v2.model.Automation;
-import org.zendesk.client.v2.model.Brand;
-import org.zendesk.client.v2.model.Comment;
-import org.zendesk.client.v2.model.ComplianceDeletionStatus;
-import org.zendesk.client.v2.model.DeletedTicket;
-import org.zendesk.client.v2.model.Field;
-import org.zendesk.client.v2.model.Forum;
-import org.zendesk.client.v2.model.Group;
-import org.zendesk.client.v2.model.GroupMembership;
-import org.zendesk.client.v2.model.Identity;
-import org.zendesk.client.v2.model.JobStatus;
-import org.zendesk.client.v2.model.Macro;
-import org.zendesk.client.v2.model.Metric;
-import org.zendesk.client.v2.model.Organization;
-import org.zendesk.client.v2.model.OrganizationField;
-import org.zendesk.client.v2.model.OrganizationMembership;
-import org.zendesk.client.v2.model.SatisfactionRating;
-import org.zendesk.client.v2.model.SearchResultEntity;
-import org.zendesk.client.v2.model.SortOrder;
-import org.zendesk.client.v2.model.Sorting;
-import org.zendesk.client.v2.model.Status;
-import org.zendesk.client.v2.model.SupportCenterLocale;
-import org.zendesk.client.v2.model.SuspendedTicket;
-import org.zendesk.client.v2.model.Ticket;
-import org.zendesk.client.v2.model.TicketCount;
-import org.zendesk.client.v2.model.TicketForm;
-import org.zendesk.client.v2.model.TicketImport;
-import org.zendesk.client.v2.model.TicketPage;
-import org.zendesk.client.v2.model.TicketResult;
-import org.zendesk.client.v2.model.Topic;
-import org.zendesk.client.v2.model.Trigger;
-import org.zendesk.client.v2.model.TwitterMonitor;
-import org.zendesk.client.v2.model.User;
-import org.zendesk.client.v2.model.UserField;
-import org.zendesk.client.v2.model.UserRelatedInfo;
-import org.zendesk.client.v2.model.View;
+import org.zendesk.client.v2.model.*;
 import org.zendesk.client.v2.model.dynamic.DynamicContentItem;
 import org.zendesk.client.v2.model.dynamic.DynamicContentItemVariant;
 import org.zendesk.client.v2.model.hc.Article;
@@ -91,6 +53,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2399,12 +2362,12 @@ public class Zendesk implements Closeable {
                 handleList(Article.class, "articles")));
     }
 
-    public Iterable<Article> getArticlesIncrementally(Date startTime, String locale, int page, int perPage) {
+    public Iterable<Article> getArticlesIncrementally(Instant startTime, String locale, int page, int perPage) {
         return complete(submit(
                 req("GET",
                         tmpl("/help_center/incremental/articles.json{?locale,start_time,page,per_page}")
-                                .set("locale", locale)
                                 .set("start_time", startTime)
+                                .set("locale", locale)
                                 .set("page", page)
                                 .set("per_page", perPage)
                 ),

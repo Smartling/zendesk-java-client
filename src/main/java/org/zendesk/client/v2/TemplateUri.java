@@ -2,6 +2,7 @@ package org.zendesk.client.v2;
 
 import com.damnhandy.uri.template.UriTemplate;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,6 +30,11 @@ class TemplateUri extends Uri {
 
     public TemplateUri set(String variableName, Date value) {
         uri.set(variableName, value);
+        return this;
+    }
+
+    public TemplateUri set(String variableName, Instant value) {
+        uri.set(variableName, value.toEpochMilli());
         return this;
     }
 
