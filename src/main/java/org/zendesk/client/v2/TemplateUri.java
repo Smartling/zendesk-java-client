@@ -34,7 +34,7 @@ class TemplateUri extends Uri {
     }
 
     public TemplateUri set(String variableName, Instant value) {
-        uri.set(variableName, value.toEpochMilli());
+        uri.set(variableName, value.getEpochSecond());
         return this;
     }
 
